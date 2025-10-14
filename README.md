@@ -1,8 +1,24 @@
 Aquí vamos a ir añadiendo toda la información del proyecto hogarLink, vamos a dividir su desarrollo en sprints:
-- Primeras dos semanas: Configuración del IDE eclipse con maven, spring, un jdk común para que no haya conflictos, y una estructura de carpetas adecuada para tener front y back juntos. Configuración de un repositorio de git y creación de todas las ramas para trabajar de forma común.
-- Segundas dos semanas: Creación de la bbdd (mongoDB en atlas) y desarrollo del back.
-- Terceras dos semanas: Front-end.
-- Cuartas dos semanas: Testing.
+- Sprint 1, Entorno de trabajo común (15-22 de Septiembre): Configuración del IDE eclipse con maven, spring, un jdk común para que no haya conflictos, y una estructura de carpetas adecuada para tener front y back juntos. Configuración de un repositorio de git y creación de todas las ramas para trabajar de forma común. Esto dará lugar a la versión
+        1.0.0 → subida del proyecto (eclipse) a GitHub.
+  
+- Sprint 2, Realización de pruebas iniciales (23-29 de Septiembre): Procedemos con la creación de entidades, interfaces y controladores de prueba para comprobar que la aplicación se despliega de forma adecuada en local, y que los métodos GET y POST funcionan adecuadamente. Estas pruebas están basadas en los contenidos vistos en las clases de laboratorio correspondientes. También se procede a la creación de varios .html para probar funcionalidad conjunta entre front y back. Se da lugar a las versiones:
+        1.0.1 → Commit — .gitignore (archivos OS y logs) Cambios solo en configuración del repositorio, sin afectar funcionalidad ni código fuente. (24 Sept)
+        1.0.2 → Commit — Plan de desarrollo (README inicial) Solo documentación del proyecto (planificación, estructura, sprints). (24 Sept)
+        1.1.0 → Commit — WebController.java + inicio.html. Se añade un controlador y una vista inicial, creando la primera funcionalidad accesible desde navegador. (29 Sept)
+        1.2.0 → Commit — Greeting.java, greeting.html, result.html. Se añade una entidad (Greeting), controladores @GetMapping y @PostMapping, y páginas nuevas para formulario y                   resultado. Amplía el sistema con nuevas rutas (/greeting). (29 Sept)
+        1.2.1 → Commit — Actualización de README (timeline). Cambio puramente documental, sin código ni dependencias. (29 Sept).
+  
+- Sprint 3, Creación de la bbdd en local y arreglo de ramas en github (30-14 de Octubre): Descargamos el mongoDB Compass y el mongoDB Atlas para la creación de una bbdd llamada prueba con una única tabla llamada users. Realizamos pruebas en local enlazando la base de datos con nuestro proyecto para probar la nueva funcionalidad implementada (añadir users), una vez validado que funciona bien y los users se añaden correctamente, procedemos a la creación de las ramas de github en base a las necesidades de nuestro proyecto (features, hotfix, development y main) ya que las que teniamos antes no eran correctas. Después, ampliamos la funcionalidad de la bbdd prueba, permitiendo que todos los integrantes puedan acceder con sus credenciales. Realizamos pruebas para ver que se pueden añadir users desde distintos equipos y que la tabla se actualiza correctamente, permitiendo a cada usuario ver lo que habia añadido otro. Esto corresponde a las versiones:
+        1.3.0 → Commit — Integración MongoDB. Se añaden dependencias de spring-boot-starter-data-mongodb y configuración en application.properties. Introduce una nueva tecnología                  (MongoDB), pero no cambia el comportamiento actual si no se usa. (1 Oct).
+        1.3.1 → Commit — Merge development con feature/inicio-sesion. Cambios menores y fusiones en greeting.java, result.html, greeting.html. No rompe compatibilidad, solo                        integra mejoras de otra rama. (1 Oct)
+        1.4.0 → Commit — Formulario User + conexión a MongoDB (2 Oct) Se crean: User.java y UserRepository.java. Controladores en WebController para /users. Formulario en                          greeting.html para insertar y listar usuarios. Ahora la aplicación tiene un CRUD parcial con MongoDB. Esto es una nueva funcionalidad significativa, pero mantiene                  compatibilidad.
+        1.4.1 → Commit — Configuración MongoDB Atlas (2 Oct).
 
-A partir de aquí, cada uno tendrá una sección donde indicará cada commit que hace y una breve descripción incluyendo la fecha de dicho commit.
+- Sprint 4, Corrección de toda la documentación necesaria (14-20 de Octubre): Corregimos todas las cosas que nos faltaban de la documentación de cara a la primera defensa del proyecto, se corrige el README, se hace un control de versiones mejorado, y se crea un plan de gestión de configuración. Versiones:
+        1.4.2 → Commit — Corrección del README.
 
+- Sprint 6, Creación de la bbdd al completo con todas las tablas y comenzar con la programación del back (21-27 de Octubre): Aquí la intención es renombrar la bbdd prueba al nombre real que usemos y añadir todas las tablas junto con sus atributos. Además crearemos las entidades en el back, junto con sus metodos correspondientes y procederemos a hacer pruebas para ver que lo implementado funcione, este sería el Sprint que nos toca la semana que viene. Versiones: Pendiente de determinar en base a lo que consigamos implementar.
+
+
+TODO ESTO SERÍAN LOS SPRINTS DE LA PRIMERA ENTREGA, A PARTIR DE AQUÍ SE CORRESPONDERÍA A LA SEGUNDA.
