@@ -2,10 +2,36 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Página de Inicio</title>
+    <title>Lista de Usuarios</title>
 </head>
 <body>
-    <h1>¡Bienvenido a Proyecto Hogar Link!</h1>
-    <p>Tu controlador web funciona correctamente.</p>
+    <h1>Usuarios registrados</h1>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="u : ${usuarios}">
+                <td th:text="${u.id}"></td>
+                <td th:text="${u.name}"></td>
+                <td th:text="${u.email}"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <hr/>
+
+    <h2>Agregar un nuevo usuario</h2>
+    <form th:action="@{/greeting}" th:object="${greeting}" method="post">
+        <p>Nombre: <input type="text" th:field="*{name}" /></p>
+        <p>Email: <input type="email" th:field="*{email}" /></p>
+        <p><input type="submit" value="Guardar" /></p>
+    </form>
+
 </body>
 </html>
