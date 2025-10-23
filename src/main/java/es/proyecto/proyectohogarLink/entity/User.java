@@ -12,6 +12,17 @@ public class User {
 
     private String name;
     private String email;
+    
+    //contructor vacio
+    public User() {
+    	
+    }
+    
+    public User(String name, String email) {
+    	super();
+    	this.name=name;
+    	this.email=email;
+    	}
 
     // Getters y Setters
     public Long getId() { return id; }
@@ -22,5 +33,6 @@ public class User {
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+    
 }
 
