@@ -1,8 +1,7 @@
 package es.proyecto.proyectohogarLink.repository;
 
-import org.springframework.data.mongodb.repository.MongoRepository;
 import es.proyecto.proyectohogarLink.entity.User;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface UserRepository extends MongoRepository<User, String> {
-    User findByNombre(String nombre);
+public interface UserRepository extends JpaRepository<User, Long> {
 }

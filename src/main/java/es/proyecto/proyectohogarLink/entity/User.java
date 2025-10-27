@@ -1,28 +1,38 @@
 package es.proyecto.proyectohogarLink.entity;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import jakarta.persistence.*;
 
-@Document(collection = "users")  
+@Entity
+@Table(name = "user")
 public class User {
+    
     @Id
-    private String id;
-    private String nombre;
-    private int edad;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    public User() {}
-
-    public User(String nombre, int edad) {
-        this.nombre = nombre;
-        this.edad = edad;
+    private String name;
+    private String email;
+    
+    //contructor vacio
+    public User() {
+    	
     }
+    
+    public User(String name, String email) {
+    	super();
+    	this.name=name;
+    	this.email=email;
+    	}
 
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    // Getters y Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public int getEdad() { return edad; }
-    public void setEdad(int edad) { this.edad = edad; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+    
 }
+
