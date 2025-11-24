@@ -1,6 +1,7 @@
 package es.proyecto.proyectohogarLink.entity;
 
 import jakarta.persistence.*;
+
 import java.time.LocalDate;
 import java.util.*;
 

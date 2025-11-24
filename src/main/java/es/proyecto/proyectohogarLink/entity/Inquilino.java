@@ -1,7 +1,7 @@
 package es.proyecto.proyectohogarLink.entity;
 
 import jakarta.persistence.*;
-import java.util.List;
+import java.util.*;
 
 @Entity
 @DiscriminatorValue("INQUILINO")
@@ -19,7 +19,7 @@ public class Inquilino extends Usuario {
     @OneToMany(mappedBy = "inquilino")
     private List<Reserva> reservas;
 
- // Getters y Setters
+    // Getters y Setters
 	public List<Inmueble> getListaDeseos() {
 		return listaDeseos;
 	}
