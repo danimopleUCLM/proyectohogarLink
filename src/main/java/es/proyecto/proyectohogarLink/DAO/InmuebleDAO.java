@@ -4,7 +4,6 @@ import es.proyecto.proyectohogarLink.entity.Inmueble;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import java.util.List;
-import java.time.LocalDate;
 
 // Hereda de AbstractEntityDAO, pasándole la clase Inmueble
 public class InmuebleDAO extends AbstractEntityDAO<Inmueble> {
