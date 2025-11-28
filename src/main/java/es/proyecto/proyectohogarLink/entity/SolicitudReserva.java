@@ -18,5 +18,27 @@ public class SolicitudReserva {
     @JoinColumn(name = "reserva_id", nullable = false, unique = true)
     private Reserva reserva;
 
-    // Getters y Setters
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Boolean getConfirmada() {
+        return confirmada;
+    }
+
+    public void setConfirmada(Boolean confirmada) {
+        this.confirmada = confirmada;
+    }
+
+    public Reserva getReserva() {
+        return reserva;
+    }
+
+    public void setReserva(Reserva reserva) {
+        this.reserva = reserva;
+    }
 }
