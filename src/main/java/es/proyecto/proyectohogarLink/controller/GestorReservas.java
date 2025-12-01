@@ -7,6 +7,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional; // <--- IMPORTANTE
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,7 +22,6 @@ public class GestorReservas {
     @PersistenceContext
     private EntityManager em;
 
-    // Inyectamos el otro Controller para usar su lógica de pago
     @Autowired
     private GestorPagos gestorPagos;
 
@@ -35,8 +35,8 @@ public class GestorReservas {
         if (disponibilidadDAO == null) disponibilidadDAO = new DisponibilidadDAO(em);
     }
 
-    // --- REALIZAR RESERVA (Acción del Inquilino) ---
     @PostMapping("/realizarReserva")
+    @Transactional 
     public String realizarReserva(
             @RequestParam Integer idInmueble,
             @RequestParam LocalDate fechaInicio,
@@ -50,16 +50,11 @@ public class GestorReservas {
         if (!(usuario instanceof Inquilino)) return "redirect:/login";
 
         try {
-            // Recuperamos entidades
-            Inquilino inquilino = (Inquilino) usuario; // Viene de sesión
-            // Nota: aquí deberíamos buscar el inmueble por ID, asumo que el DAO genérico lo permite
-            // O usamos el EM directamente para no crear otro DAO en este ejemplo
+            Inquilino inquilino = (Inquilino) usuario;
             Inmueble inmueble = em.find(Inmueble.class, idInmueble);
 
-            // 1. Verificar disponibilidad
             boolean esInmediata = disponibilidadDAO.permiteReservaDirectaEnPeriodo(inmueble.getId(), fechaInicio, fechaFin);
 
-            // 2. Crear Reserva Base
             Reserva reserva = new Reserva();
             reserva.setFechaInicio(fechaInicio);
             reserva.setFechaFin(fechaFin);
@@ -68,16 +63,14 @@ public class GestorReservas {
 
             reservaDAO.saveEntity(reserva);
 
-            // 3. Procesar Pago (Usando GestorPagos)
             Pago pago = new Pago();
             pago.setMetodoPago(metodoPago);
             pago.setReserva(reserva);
-            gestorPagos.procesarPagoInterno(pago); // Llamada al otro controller
+            gestorPagos.procesarPagoInterno(pago);
 
-            // 4. Lógica bifurcada
             if (esInmediata) {
                 model.addAttribute("mensaje", "¡Reserva Confirmada Inmediatamente!");
-                return "reserva_exito"; // Espera reserva_exito.html
+                return "reserva_exito";
             } else {
                 SolicitudReserva solicitud = new SolicitudReserva();
                 solicitud.setReserva(reserva);
@@ -85,17 +78,16 @@ public class GestorReservas {
                 solicitudDAO.saveEntity(solicitud);
                 
                 model.addAttribute("mensaje", "Solicitud enviada. Pendiente de aprobación.");
-                return "reserva_pendiente"; // Espera reserva_pendiente.html
+                return "reserva_pendiente";
             }
 
         } catch (Exception e) {
+            e.printStackTrace();
             model.addAttribute("error", "Error procesando reserva: " + e.getMessage());
             return "error";
         }
     }
 
-    // --- GESTIÓN SOLICITUDES (Acción del Propietario) ---
-    
     @GetMapping("/propietario/solicitudes")
     public String verSolicitudes(HttpSession session, Model model) {
         initDaos();
@@ -104,10 +96,11 @@ public class GestorReservas {
 
         List<SolicitudReserva> pendientes = solicitudDAO.buscarPendientesPorPropietario(usuario.getId());
         model.addAttribute("solicitudes", pendientes);
-        return "lista_solicitudes"; // Espera lista_solicitudes.html
+        return "lista_solicitudes";
     }
 
     @PostMapping("/propietario/gestionarSolicitud")
+    @Transactional // <--- NUEVO
     public String gestionarSolicitud(@RequestParam Integer idSolicitud, 
                                      @RequestParam boolean aceptar) {
         initDaos();
@@ -118,8 +111,6 @@ public class GestorReservas {
                 solicitud.setConfirmada(true);
                 solicitudDAO.updateEntity(solicitud);
             } else {
-                // Rechazo: Devolución de dinero y borrado
-                // Aquí podrías llamar a gestorPagos.devolverDinero() si lo implementaras
                 solicitudDAO.deleteEntity(idSolicitud);
                 reservaDAO.deleteEntity(solicitud.getReserva().getId());
             }
@@ -127,4 +118,3 @@ public class GestorReservas {
         return "redirect:/propietario/solicitudes";
     }
 }
-

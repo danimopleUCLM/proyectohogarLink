@@ -61,7 +61,7 @@ public class GestorUsuarios {
     }
 
     @PostMapping("/registroInquilino")
-    @Transactional // <--- NUEVO: Spring abre la transacción aquí
+    @Transactional 
     public String registrarInquilino(@ModelAttribute Inquilino inquilino, Model model) {
         initDao();
         try {
@@ -85,7 +85,7 @@ public class GestorUsuarios {
     }
 
     @PostMapping("/registroPropietario")
-    @Transactional // <--- NUEVO: Spring abre la transacción aquí
+    @Transactional 
     public String registrarPropietario(@ModelAttribute Propietario propietario, Model model) {
         initDao();
         try {

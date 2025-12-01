@@ -5,6 +5,7 @@ import es.proyecto.proyectohogarLink.entity.Inmueble;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional; // Importar esto
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,8 +20,14 @@ public class GestorBusquedas {
     private EntityManager em;
     private InmuebleDAO inmuebleDAO;
 
-    // Ruta: /buscar?destino=Madrid&precioMax=100
+    @GetMapping({"/", "/inicio"})
+    public String mostrarInicio() {
+        return "inicio";
+    }
+
+    
     @GetMapping("/buscar")
+    @Transactional(readOnly = true) 
     public String buscarInmuebles(@RequestParam(required = false) String destino,
                                   @RequestParam(required = false) Double precioMax,
                                   @RequestParam(required = false) String politica,
@@ -31,17 +38,18 @@ public class GestorBusquedas {
         List<Inmueble> resultados = inmuebleDAO.buscarPorFiltros(destino, precioMax, politica);
         
         model.addAttribute("listaInmuebles", resultados);
-        return "lista_inmuebles"; // Espera lista_inmuebles.html
+        return "lista_inmuebles";
     }
     
-    // Ver detalle de un piso antes de reservar
+    // Ver detalle de un piso
     @GetMapping("/detalle/{id}")
+    @Transactional(readOnly = true) 
     public String verDetalle(@PathVariable Integer id, Model model) {
         if (inmuebleDAO == null) inmuebleDAO = new InmuebleDAO(em);
         
         Inmueble inmueble = inmuebleDAO.selectEntity(id);
         model.addAttribute("inmueble", inmueble);
         
-        return "detalle_inmueble"; // Espera detalle_inmueble.html
+        return "detalle_inmueble";
     }
 }
