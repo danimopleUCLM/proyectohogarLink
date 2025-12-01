@@ -4,19 +4,24 @@ import es.proyecto.proyectohogarLink.DAO.*;
 import es.proyecto.proyectohogarLink.entity.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDate;
 import java.util.List;
 
-@Service
+@Controller
 public class GestorReservas {
 
     @PersistenceContext
     private EntityManager em;
 
-    // Inyectamos el gestor de pagos para usar su lógica
+    // Inyectamos el otro Controller para usar su lógica de pago
     @Autowired
     private GestorPagos gestorPagos;
 
@@ -30,83 +35,96 @@ public class GestorReservas {
         if (disponibilidadDAO == null) disponibilidadDAO = new DisponibilidadDAO(em);
     }
 
-    /**
-     * MÉTODO CENTRAL DEL SISTEMA
-     * Gestiona la creación de la reserva, el pago y la decisión de si es solicitud o directa.
-     */
-    public void realizarReserva(Inquilino inquilino, Inmueble inmueble, LocalDate inicio, LocalDate fin, Pago datosPago) {
+    // --- REALIZAR RESERVA (Acción del Inquilino) ---
+    @PostMapping("/realizarReserva")
+    public String realizarReserva(
+            @RequestParam Integer idInmueble,
+            @RequestParam LocalDate fechaInicio,
+            @RequestParam LocalDate fechaFin,
+            @RequestParam MetodoPago metodoPago,
+            HttpSession session,
+            Model model) {
+
         initDaos();
+        Usuario usuario = (Usuario) session.getAttribute("usuarioLogueado");
+        if (!(usuario instanceof Inquilino)) return "redirect:/login";
 
-        // 1. Verificar si el inmueble permite reserva inmediata en esas fechas
-        boolean esInmediata = disponibilidadDAO.permiteReservaDirectaEnPeriodo(inmueble.getId(), inicio, fin);
+        try {
+            // Recuperamos entidades
+            Inquilino inquilino = (Inquilino) usuario; // Viene de sesión
+            // Nota: aquí deberíamos buscar el inmueble por ID, asumo que el DAO genérico lo permite
+            // O usamos el EM directamente para no crear otro DAO en este ejemplo
+            Inmueble inmueble = em.find(Inmueble.class, idInmueble);
 
-        // 2. Crear la entidad Reserva
-        Reserva reserva = new Reserva();
-        reserva.setFechaInicio(inicio);
-        reserva.setFechaFin(fin);
-        reserva.setInquilino(inquilino);
-        reserva.setInmueble(inmueble);
+            // 1. Verificar disponibilidad
+            boolean esInmediata = disponibilidadDAO.permiteReservaDirectaEnPeriodo(inmueble.getId(), fechaInicio, fechaFin);
 
-        // 3. Guardar Reserva Base
-        reservaDAO.saveEntity(reserva);
+            // 2. Crear Reserva Base
+            Reserva reserva = new Reserva();
+            reserva.setFechaInicio(fechaInicio);
+            reserva.setFechaFin(fechaFin);
+            reserva.setInquilino(inquilino);
+            reserva.setInmueble(inmueble);
 
-        // 4. Procesar el Pago (Se hace en ambos casos según requisitos)
-        datosPago.setReserva(reserva);
-        gestorPagos.procesarPago(datosPago);
+            reservaDAO.saveEntity(reserva);
 
-        // 5. Bifurcación de lógica
-        if (esInmediata) {
-            // CASO A: Reserva Inmediata
-            System.out.println("Reserva ID " + reserva.getId() + " confirmada automáticamente.");
-            // Aquí se podría enviar email de confirmación
-        } else {
-            // CASO B: Requiere Aprobación (Crear Solicitud)
-            SolicitudReserva solicitud = new SolicitudReserva();
-            solicitud.setReserva(reserva);
-            solicitud.setConfirmada(false); // Pendiente
-            
-            solicitudDAO.saveEntity(solicitud);
-            System.out.println("Solicitud de reserva generada. Pendiente de aprobación del propietario.");
+            // 3. Procesar Pago (Usando GestorPagos)
+            Pago pago = new Pago();
+            pago.setMetodoPago(metodoPago);
+            pago.setReserva(reserva);
+            gestorPagos.procesarPagoInterno(pago); // Llamada al otro controller
+
+            // 4. Lógica bifurcada
+            if (esInmediata) {
+                model.addAttribute("mensaje", "¡Reserva Confirmada Inmediatamente!");
+                return "reserva_exito"; // Espera reserva_exito.html
+            } else {
+                SolicitudReserva solicitud = new SolicitudReserva();
+                solicitud.setReserva(reserva);
+                solicitud.setConfirmada(false);
+                solicitudDAO.saveEntity(solicitud);
+                
+                model.addAttribute("mensaje", "Solicitud enviada. Pendiente de aprobación.");
+                return "reserva_pendiente"; // Espera reserva_pendiente.html
+            }
+
+        } catch (Exception e) {
+            model.addAttribute("error", "Error procesando reserva: " + e.getMessage());
+            return "error";
         }
     }
 
-    /**
-     * Panel Propietario: Ver solicitudes pendientes
-     */
-    public List<SolicitudReserva> verSolicitudesPendientes(int idPropietario) {
+    // --- GESTIÓN SOLICITUDES (Acción del Propietario) ---
+    
+    @GetMapping("/propietario/solicitudes")
+    public String verSolicitudes(HttpSession session, Model model) {
         initDaos();
-        return solicitudDAO.buscarPendientesPorPropietario(idPropietario);
+        Usuario usuario = (Usuario) session.getAttribute("usuarioLogueado");
+        if (!(usuario instanceof Propietario)) return "redirect:/login";
+
+        List<SolicitudReserva> pendientes = solicitudDAO.buscarPendientesPorPropietario(usuario.getId());
+        model.addAttribute("solicitudes", pendientes);
+        return "lista_solicitudes"; // Espera lista_solicitudes.html
     }
 
-    /**
-     * Panel Propietario: Aceptar o Rechazar solicitud
-     */
-    public void gestionarSolicitud(int idSolicitud, boolean aceptar) {
+    @PostMapping("/propietario/gestionarSolicitud")
+    public String gestionarSolicitud(@RequestParam Integer idSolicitud, 
+                                     @RequestParam boolean aceptar) {
         initDaos();
         SolicitudReserva solicitud = solicitudDAO.selectEntity(idSolicitud);
 
-        if (solicitud == null) return;
-
-        if (aceptar) {
-            solicitud.setConfirmada(true);
-            solicitudDAO.updateEntity(solicitud);
-            System.out.println("Reserva confirmada por el propietario.");
-            // Notificar inquilino
-        } else {
-            // RECHAZAR: Devolver dinero y borrar reserva
-            Pago pago = solicitud.getReserva().getPago();
-            System.out.println("Devolviendo importe de referencia: " + pago.getReferencia());
-            
-            // Eliminamos la solicitud y la reserva (cascade debería borrar el pago si está configurado, 
-            // sino borramos manualmente).
-            solicitudDAO.deleteEntity(idSolicitud);
-            reservaDAO.deleteEntity(solicitud.getReserva().getId());
-            
-            System.out.println("Reserva cancelada y dinero devuelto.");
+        if (solicitud != null) {
+            if (aceptar) {
+                solicitud.setConfirmada(true);
+                solicitudDAO.updateEntity(solicitud);
+            } else {
+                // Rechazo: Devolución de dinero y borrado
+                // Aquí podrías llamar a gestorPagos.devolverDinero() si lo implementaras
+                solicitudDAO.deleteEntity(idSolicitud);
+                reservaDAO.deleteEntity(solicitud.getReserva().getId());
+            }
         }
+        return "redirect:/propietario/solicitudes";
     }
 }
-
-
-
 
