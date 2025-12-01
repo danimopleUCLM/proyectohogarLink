@@ -45,3 +45,6 @@ $RECYCLE.BIN/
 
 ### Logs ###
 *.log
+
+### ignorar bases de datos SQLite
+*.db *.sqlite *.sqlite3
