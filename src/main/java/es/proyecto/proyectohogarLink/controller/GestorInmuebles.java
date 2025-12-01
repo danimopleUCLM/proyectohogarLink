@@ -51,7 +51,7 @@ public class GestorInmuebles {
     }
 
     @PostMapping("/nuevo-inmueble")
-    @Transactional // <--- NUEVO
+    @Transactional 
     public String guardarInmueble(@ModelAttribute Inmueble inmueble, HttpSession session) {
         initDaos();
         Usuario usuario = (Usuario) session.getAttribute("usuarioLogueado");
@@ -65,7 +65,7 @@ public class GestorInmuebles {
     }
     
     @PostMapping("/agregar-disponibilidad")
-    @Transactional // <--- NUEVO
+    @Transactional 
     public String agregarDisponibilidad(@ModelAttribute Disponibilidad disponibilidad, 
                                         @RequestParam Integer idInmueble,
                                         Model model) {

@@ -36,7 +36,7 @@ public class GestorReservas {
     }
 
     @PostMapping("/realizarReserva")
-    @Transactional // <--- NUEVO: Todo esto ocurre en una sola transacción
+    @Transactional 
     public String realizarReserva(
             @RequestParam Integer idInmueble,
             @RequestParam LocalDate fechaInicio,

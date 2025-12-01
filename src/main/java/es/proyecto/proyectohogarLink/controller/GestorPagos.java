@@ -16,7 +16,7 @@ public class GestorPagos {
     private EntityManager em;
     private PagoDAO pagoDAO;
 
-    @Transactional // <--- NUEVO
+    @Transactional 
     public Pago procesarPagoInterno(Pago datosPago) {
         if (pagoDAO == null) pagoDAO = new PagoDAO(em);
 
