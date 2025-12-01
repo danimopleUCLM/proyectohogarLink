@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Panel Propietario</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+    <nav class="navbar navbar-dark bg-dark mb-4">
+        <div class="container">
+            <span class="navbar-brand">🛠 Panel de Gestión</span>
+            <div>
+                <a href="/buscar" class="btn btn-outline-light btn-sm me-2">Ir al Buscador</a>
+                <a href="/logout" class="btn btn-danger btn-sm">Salir</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Mis Propiedades</h2>
+            <div>
+                <a href="/propietario/nuevo-inmueble" class="btn btn-success">➕ Nuevo Inmueble</a>
+                <a href="/propietario/solicitudes" class="btn btn-warning">📩 Ver Solicitudes Pendientes</a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12" th:each="piso : ${misInmuebles}">
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center bg-white">
+                        <h5 class="mb-0 text-primary" th:text="${piso.direccion}">Calle Ejemplo</h5>
+                        <span class="badge bg-secondary" th:text="${piso.politicaCancelacion}">Política</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 border-end">
+                                <p><strong>Precio Base:</strong> <span th:text="${piso.precioNoche}"></span>€</p>
+                                <h6>Disponibilidades actuales:</h6>
+                                <ul class="small">
+                                    <li th:each="d : ${piso.disponibilidades}">
+                                        <span th:text="${d.fechaInicio}"></span> al <span th:text="${d.fechaFin}"></span> 
+                                        (<span th:text="${d.directa ? 'Inmediata' : 'Solicitud'}"></span>)
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-muted">Añadir nuevas fechas libres:</h6>
+                                <form action="/propietario/agregar-disponibilidad" method="post" class="row g-2">
+                                    <input type="hidden" name="idInmueble" th:value="${piso.id}">
+                                    
+                                    <div class="col-6">
+                                        <input type="date" name="fechaInicio" class="form-control form-control-sm" required>
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="date" name="fechaFin" class="form-control form-control-sm" required>
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="number" name="precio" placeholder="Precio" class="form-control form-control-sm" required>
+                                    </div>
+                                    <div class="col-6 d-flex align-items-center">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="directa" id="directaCheck">
+                                            <label class="form-check-label small" for="directaCheck">Inmediata</label>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-sm w-100 mt-2">Añadir Disponibilidad</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div th:if="${#lists.isEmpty(misInmuebles)}" class="alert alert-info text-center">
+            Aún no has dado de alta ninguna propiedad.
+        </div>
+    </div>
+</body>
+</html>
