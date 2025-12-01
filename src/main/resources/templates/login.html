@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Acceso - HogarLink</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f4f6f9; display: flex; align-items: center; justify-content: center; height: 100vh; }
+        .login-card { width: 100%; max-width: 400px; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); background: white; }
+        .brand-logo { color: #0d6efd; font-weight: bold; font-size: 2rem; text-align: center; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="brand-logo">🏠 HogarLink</div>
+        <h4 class="text-center mb-4 text-muted">Iniciar Sesión</h4>
+        
+        <div th:if="${error}" class="alert alert-danger text-center" role="alert">
+            <span th:text="${error}"></span>
+        </div>
+
+        <form action="/login" method="post">
+            <div class="mb-3">
+                <label class="form-label">Usuario</label>
+                <input type="text" name="login" class="form-control" placeholder="Ej: usuario1" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Contraseña</label>
+                <input type="password" name="pass" class="form-control" placeholder="••••••" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 py-2">Entrar</button>
+        </form>
+
+        <hr class="my-4">
+        
+        <div class="text-center">
+            <p class="small text-muted">¿Eres nuevo?</p>
+            <div class="d-grid gap-2">
+                <a href="/registroInquilino" class="btn btn-outline-secondary btn-sm">Registro Inquilino</a>
+                <a href="/registroPropietario" class="btn btn-outline-dark btn-sm">Registro Propietario</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
