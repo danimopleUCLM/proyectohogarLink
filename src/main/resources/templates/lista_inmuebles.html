@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Catálogo - HogarLink</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+	<nav class="navbar navbar-expand navbar-white bg-white shadow-sm sticky-top mb-4">
+	    <div class="container">
+	        <a class="navbar-brand fw-bold text-primary" href="/inicio">🏠 HogarLink</a>
+	        <div class="navbar-nav ms-auto align-items-center">
+	            
+	            <th:block th:if="${session.usuarioLogueado != null}">
+	                <span class="me-3">Hola, <b th:text="${session.usuarioLogueado.nombre}"></b></span>
+	                
+	                <a th:if="${session.usuarioLogueado.rol == 'Propietario'}" 
+	                   href="/propietario/mis-inmuebles" class="btn btn-dark btn-sm me-2">Mi Panel</a>
+	                   
+	                <a href="/logout" class="btn btn-outline-danger btn-sm">Salir</a>
+	            </th:block>
+
+	            <a th:unless="${session.usuarioLogueado}" href="/login" class="btn btn-primary btn-sm">Entrar</a>
+	            
+	        </div>
+	    </div>
+	</nav>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body">
+                        <h5 class="mb-3">🔍 Filtros</h5>
+                        <form action="/buscar" method="get">
+                            <div class="mb-3">
+                                <label class="form-label small">Destino</label>
+                                <input type="text" name="destino" class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small">Precio Máximo</label>
+                                <input type="number" name="precioMax" class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small">Política</label>
+                                <select name="politica" class="form-select">
+                                    <option value="">Cualquiera</option>
+                                    <option value="REEMBOLSABLE">Reembolsable</option>
+                                    <option value="NO_REEMBOLSABLE">No Reembolsable</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 mb-2">Filtrar</button>
+                            <a href="/buscar" class="btn btn-outline-secondary w-100">Ver Todo</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-9">
+                <h3>Alojamientos Disponibles</h3>
+                <div th:if="${#lists.isEmpty(listaInmuebles)}" class="alert alert-info">No hay resultados.</div>
+
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    <div class="col" th:each="piso : ${listaInmuebles}">
+                        <div class="card h-100 border-0 shadow-sm">
+							<img th:src="'https://picsum.photos/400/300?random=' + ${piso.id}" 
+							             class="card-img-top" 
+							             alt="Foto Inmueble" 
+							             style="height: 200px; object-fit: cover;">
+                            <div class="card-body">
+                                <h5 class="card-title text-truncate" th:text="${piso.direccion}"></h5>
+                                <p class="text-muted small mb-2">Anfitrión: <span th:text="${piso.propietario.nombre}"></span></p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-light text-dark border" th:text="${piso.politicaCancelacion}"></span>
+                                    <span class="fw-bold fs-5" th:text="${piso.precioNoche} + '€'"></span>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-white border-0 pb-3">
+                                <a th:href="@{/detalle/{id}(id=${piso.id})}" class="btn btn-outline-primary w-100 stretched-link">Ver Disponibilidad</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+	<footer class="bg-dark text-white pt-5 pb-4 mt-auto">
+	    <div class="container text-center text-md-start">
+	        <div class="row text-center text-md-start">
+	            <div class="col-md-3 col-lg-3 col-xl-3 mx-auto mt-3">
+	                <h5 class="text-uppercase mb-4 fw-bold text-primary">🏠 HogarLink</h5>
+	                <p>La plataforma líder en alquiler de viviendas entre particulares. Sin comisiones abusivas, trato directo y seguro.</p>
+	            </div>
+	            <div class="col-md-2 col-lg-2 col-xl-2 mx-auto mt-3">
+	                <h5 class="text-uppercase mb-4 fw-bold">Productos</h5>
+	                <p><a href="/buscar" class="text-white" style="text-decoration: none;">Buscar Casa</a></p>
+	                <p><a href="/registroPropietario" class="text-white" style="text-decoration: none;">Publicar Piso</a></p>
+	            </div>
+	            <div class="col-md-3 col-lg-2 col-xl-2 mx-auto mt-3">
+	                <h5 class="text-uppercase mb-4 fw-bold">Enlaces Útiles</h5>
+	                <p><a href="/login" class="text-white" style="text-decoration: none;">Tu Cuenta</a></p>
+	                <p><a href="#" class="text-white" style="text-decoration: none;">Ayuda</a></p>
+	            </div>
+	            <div class="col-md-4 col-lg-3 col-xl-3 mx-auto mt-3">
+	                <h5 class="text-uppercase mb-4 fw-bold">Contacto</h5>
+	                <p>📍 C/ Talavera, s/n, Toledo</p>
+	                <p>✉️ info@hogarlink.es</p>
+	            </div>
+	        </div>
+	        <hr class="mb-4">
+	        <div class="row align-items-center">
+	            <div class="col-md-7 col-lg-8">
+	                <p>Copyright © 2025 Todos los derechos reservados por:
+	                    <a href="#" style="text-decoration: none;"><strong class="text-primary">Tu Nombre/Grupo</strong></a>
+	                </p>
+	            </div>
+	        </div>
+	    </div>
+	</footer>
+</body>
+</html>

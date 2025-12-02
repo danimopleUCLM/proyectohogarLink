@@ -6,8 +6,9 @@ import es.proyecto.proyectohogarLink.entity.Propietario;
 import es.proyecto.proyectohogarLink.entity.Usuario;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.servlet.http.HttpSession; // Para guardar la sesión del usuario
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional; // IMPORTANTE
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +27,7 @@ public class GestorUsuarios {
     // --- LOGIN ---
     @GetMapping("/login")
     public String mostrarLogin() {
-        return "login"; // Espera un archivo login.html
+        return "login";
     }
 
     @PostMapping("/login")
@@ -38,9 +39,8 @@ public class GestorUsuarios {
         Usuario usuario = usuarioDAO.autenticar(login, pass);
         
         if (usuario != null) {
-            // Guardamos el usuario completo en la sesión para usarlo en otros controllers
             session.setAttribute("usuarioLogueado", usuario);
-            return "redirect:/buscar"; // Al loguearse, vamos al buscador
+            return "redirect:/inicio";
         } else {
             model.addAttribute("error", "Usuario o contraseña incorrectos");
             return "login";
@@ -57,10 +57,11 @@ public class GestorUsuarios {
     @GetMapping("/registroInquilino")
     public String formRegistroInquilino(Model model) {
         model.addAttribute("inquilino", new Inquilino());
-        return "registro_inquilino"; // Espera registro_inquilino.html
+        return "registro_inquilino";
     }
 
     @PostMapping("/registroInquilino")
+    @Transactional // <--- AÑADIDO: Gestiona la transacción automáticamente
     public String registrarInquilino(@ModelAttribute Inquilino inquilino, Model model) {
         initDao();
         try {
@@ -69,7 +70,7 @@ public class GestorUsuarios {
                 return "registro_inquilino";
             }
             usuarioDAO.saveEntity(inquilino);
-            return "redirect:/login"; // Éxito
+            return "redirect:/login";
         } catch (Exception e) {
             model.addAttribute("error", "Error en registro: " + e.getMessage());
             return "registro_inquilino";
@@ -80,10 +81,11 @@ public class GestorUsuarios {
     @GetMapping("/registroPropietario")
     public String formRegistroPropietario(Model model) {
         model.addAttribute("propietario", new Propietario());
-        return "registro_propietario"; // Espera registro_propietario.html
+        return "registro_propietario";
     }
 
     @PostMapping("/registroPropietario")
+    @Transactional // <--- AÑADIDO
     public String registrarPropietario(@ModelAttribute Propietario propietario, Model model) {
         initDao();
         try {
