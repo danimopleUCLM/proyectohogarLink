@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDate;
-import java.util.ArrayList; // Importante para listas vacías
 import java.util.List;
 
 @Controller
@@ -22,9 +21,9 @@ public class GestorReservas {
 
     @PersistenceContext
     private EntityManager em;
-
+    
     @Autowired
-    private GestorPagos gestorPagos;
+    private GestorPagos gestorPagos; // Necesario para simular reembolso
 
     private ReservaDAO reservaDAO;
     private SolicitudReservaDAO solicitudDAO;
@@ -36,7 +35,7 @@ public class GestorReservas {
         if (disponibilidadDAO == null) disponibilidadDAO = new DisponibilidadDAO(em);
     }
 
-    // --- REALIZAR RESERVA ---
+    // --- REALIZAR RESERVA (Igual que antes, pero usando estado) ---
     @PostMapping("/realizarReserva")
     @Transactional
     public String realizarReserva(
@@ -54,7 +53,8 @@ public class GestorReservas {
         try {
             Inquilino inquilino = (Inquilino) usuario;
             Inmueble inmueble = em.find(Inmueble.class, idInmueble);
-
+            
+            // ... lógica de disponibilidad ... 
             boolean esInmediata = disponibilidadDAO.permiteReservaDirectaEnPeriodo(inmueble.getId(), fechaInicio, fechaFin);
 
             Reserva reserva = new Reserva();
@@ -71,15 +71,20 @@ public class GestorReservas {
             gestorPagos.procesarPagoInterno(pago);
 
             if (esInmediata) {
+                // Si es inmediata, no creamos solicitud pendiente, o creamos una directamente ACEPTADA
+                // Para simplificar tu modelo, creamos solicitud ACEPTADA
+                SolicitudReserva solicitud = new SolicitudReserva();
+                solicitud.setReserva(reserva);
+                solicitud.setEstado("ACEPTADA");
+                solicitudDAO.saveEntity(solicitud);
+                
                 model.addAttribute("mensaje", "¡Reserva Confirmada Inmediatamente!");
                 return "reserva_exito";
             } else {
                 SolicitudReserva solicitud = new SolicitudReserva();
                 solicitud.setReserva(reserva);
-                solicitud.setConfirmada(false);
+                solicitud.setEstado("PENDIENTE"); // Se queda esperando al propietario
                 solicitudDAO.saveEntity(solicitud);
-                
-                System.out.println(">>> DEBUG: Solicitud creada con ID Reserva: " + reserva.getId());
                 
                 model.addAttribute("mensaje", "Solicitud enviada. Pendiente de aprobación.");
                 return "reserva_pendiente";
@@ -87,69 +92,65 @@ public class GestorReservas {
 
         } catch (Exception e) {
             e.printStackTrace();
-            model.addAttribute("error", "Error procesando reserva: " + e.getMessage());
+            model.addAttribute("error", "Error: " + e.getMessage());
             return "error";
         }
     }
 
-    // --- GESTIÓN SOLICITUDES (CORREGIDO CON LOGS) ---
+    // --- VISTA PROPIETARIO (Gestionar) ---
     @GetMapping("/propietario/solicitudes")
-    public String verSolicitudes(HttpSession session, Model model) {
+    public String verSolicitudesPropietario(HttpSession session, Model model) {
         initDaos();
         Usuario usuario = (Usuario) session.getAttribute("usuarioLogueado");
         if (!(usuario instanceof Propietario)) return "redirect:/login";
 
         List<SolicitudReserva> pendientes = solicitudDAO.buscarPendientesPorPropietario(usuario.getId());
-        
-        // --- BLOQUE DE DEPURACIÓN (MIRA LA CONSOLA AL ENTRAR AQUÍ) ---
-        if (pendientes == null) {
-            System.out.println(">>> DEBUG: La lista de pendientes es NULL");
-            pendientes = new ArrayList<>();
-        } else {
-            System.out.println(">>> DEBUG: Tamaño de lista recuperada: " + pendientes.size());
-            for (int i = 0; i < pendientes.size(); i++) {
-                SolicitudReserva s = pendientes.get(i);
-                if (s == null) {
-                    System.out.println(">>> DEBUG: Elemento [" + i + "] es NULL (Error de base de datos)");
-                } else {
-                    System.out.println(">>> DEBUG: Elemento [" + i + "] ID Solicitud: " + s.getId());
-                    System.out.println(">>> DEBUG:    -> Reserva asociada: " + (s.getReserva() != null ? "ID " + s.getReserva().getId() : "NULL"));
-                }
-            }
-        }
-        // -------------------------------------------------------------
-
         model.addAttribute("solicitudes", pendientes);
         return "lista_solicitudes";
     }
 
     @PostMapping("/propietario/gestionarSolicitud")
-    @Transactional
+    @Transactional 
     public String gestionarSolicitud(@RequestParam Integer idSolicitud, 
                                      @RequestParam boolean aceptar) {
         initDaos();
-        // Añadida validación extra por si idSolicitud llega nulo
-        if(idSolicitud == null) return "redirect:/propietario/solicitudes";
-
         SolicitudReserva solicitud = solicitudDAO.selectEntity(idSolicitud);
 
         if (solicitud != null) {
             if (aceptar) {
-                System.out.println(">>> DEBUG: Aceptando solicitud " + idSolicitud);
-                solicitud.setConfirmada(true);
+                solicitud.setEstado("ACEPTADA");
                 solicitudDAO.updateEntity(solicitud);
             } else {
-                System.out.println(">>> DEBUG: Rechazando solicitud " + idSolicitud);
-                // Al borrar, aseguramos borrar la reserva también si es necesario
-                Reserva reserva = solicitud.getReserva();
-                solicitudDAO.deleteEntity(idSolicitud);
-                if (reserva != null) {
-                    reservaDAO.deleteEntity(reserva.getId());
+                solicitud.setEstado("RECHAZADA");
+                solicitudDAO.updateEntity(solicitud);
+                
+                // Lógica de Reembolso
+                Pago pago = solicitud.getReserva().getPago();
+                if(pago != null) {
+                    System.out.println("--- REEMBOLSO REALIZADO ---");
+                    System.out.println("Devolviendo dinero a: " + solicitud.getReserva().getInquilino().getNombre());
+                    System.out.println("Referencia de pago original: " + pago.getReferencia());
+                    System.out.println("Monto devuelto al método: " + pago.getMetodoPago());
+                    System.out.println("---------------------------");
                 }
             }
-        } else {
-            System.out.println(">>> DEBUG: No se encontró la solicitud con ID " + idSolicitud);
         }
         return "redirect:/propietario/solicitudes";
+    }
+
+    // --- NUEVO: VISTA INQUILINO (Buzón de notificaciones) ---
+    @GetMapping("/inquilino/mis-reservas")
+    public String verMisReservasInquilino(HttpSession session, Model model) {
+        initDaos();
+        Usuario usuario = (Usuario) session.getAttribute("usuarioLogueado");
+        
+        // Verificamos que sea inquilino
+        if (usuario != null && "Inquilino".equals(usuario.getRol())) {
+             List<SolicitudReserva> misSolicitudes = solicitudDAO.buscarTodasPorInquilino(usuario.getId());
+             model.addAttribute("misSolicitudes", misSolicitudes);
+             return "mis_reservas_inquilino";
+        }
+        
+        return "redirect:/login";
     }
 }
