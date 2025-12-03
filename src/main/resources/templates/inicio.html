@@ -4,22 +4,49 @@
     <title>Bienvenido a HogarLink</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .hero { background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80'); background-size: cover; height: 80vh; display: flex; align-items: center; justify-content: center; color: white; }
+        /* Imagen de fondo estilo Hero */
+        .hero { 
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80'); 
+            background-size: cover; 
+            height: 80vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            color: white; 
+        }
     </style>
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
+    
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
         <div class="container">
             <a class="navbar-brand fw-bold" href="/">🏠 HogarLink</a>
-            <div>
-                <span th:if="${session.usuarioLogueado}" class="text-white me-3">Hola, <b th:text="${session.usuarioLogueado.nombre}"></b></span>
-                <a th:if="${session.usuarioLogueado == null}" href="/login" class="btn btn-outline-light btn-sm">Iniciar Sesión</a>
-                <a th:if="${session.usuarioLogueado != null}" href="/logout" class="btn btn-danger btn-sm">Salir</a>
+            <div class="d-flex align-items-center">
+                
+                <div th:if="${session.usuarioLogueado == null}">
+                    <a href="/login" class="btn btn-outline-light btn-sm me-2">Iniciar Sesión</a>
+                    <a href="/registroInquilino" class="btn btn-primary btn-sm">Registrarse</a>
+                </div>
+
+                <div th:if="${session.usuarioLogueado != null}">
+                    <span class="text-white me-3">Hola, <b th:text="${session.usuarioLogueado.nombre}">User</b></span>
+                    
+                    <a th:if="${session.usuarioLogueado.rol == 'Propietario'}" 
+                       href="/propietario/mis-inmuebles" 
+                       class="btn btn-warning btn-sm me-2">⚙️ Mi Panel</a>
+
+                    <a th:if="${session.usuarioLogueado.rol == 'Inquilino'}" 
+                       href="/inquilino/mis-reservas" 
+                       class="btn btn-info btn-sm me-2 text-white">📬 Mis Reservas</a>
+                    
+                    <a href="/logout" class="btn btn-danger btn-sm">Salir</a>
+                </div>
+
             </div>
         </div>
     </nav>
 
-    <header class="hero text-center">
+    <header class="hero text-center flex-grow-1">
         <div class="container">
             <h1 class="display-3 fw-bold mb-3">Encuentra tu alojamiento ideal</h1>
             <p class="lead mb-4">De particular a particular. Sin complicaciones.</p>
@@ -42,5 +69,30 @@
             </div>
         </div>
     </header>
+
+    <footer class="bg-dark text-white pt-5 pb-4 mt-auto">
+        <div class="container text-center text-md-start">
+            <div class="row text-center text-md-start">
+                <div class="col-md-3 col-lg-3 col-xl-3 mx-auto mt-3">
+                    <h5 class="text-uppercase mb-4 fw-bold text-primary">🏠 HogarLink</h5>
+                    <p>La plataforma líder en alquiler de viviendas.</p>
+                </div>
+                <div class="col-md-2 col-lg-2 col-xl-2 mx-auto mt-3">
+                    <h5 class="text-uppercase mb-4 fw-bold">Producto</h5>
+                    <p><a href="/buscar" class="text-white text-decoration-none">Buscar Casa</a></p>
+                </div>
+                <div class="col-md-4 col-lg-3 col-xl-3 mx-auto mt-3">
+                    <h5 class="text-uppercase mb-4 fw-bold">Contacto</h5>
+                    <p>📍 C/ Talavera, s/n, Toledo</p>
+                </div>
+            </div>
+            <hr class="mb-4">
+            <div class="row align-items-center">
+                <div class="col-md-7 col-lg-8">
+                    <p>Copyright © 2025 Todos los derechos reservados.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>

@@ -10,7 +10,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional; // <--- IMPORTANTE
+import org.springframework.transaction.annotation.Transactional; // IMPORTANTE
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +31,7 @@ public class GestorInmuebles {
         if (disponibilidadDAO == null) disponibilidadDAO = new DisponibilidadDAO(em);
     }
 
+    // Listar mis inmuebles
     @GetMapping("/mis-inmuebles")
     public String listarMisInmuebles(HttpSession session, Model model) {
         initDaos();
@@ -44,14 +45,16 @@ public class GestorInmuebles {
         return "redirect:/login";
     }
 
+    // Formulario Alta Inmueble
     @GetMapping("/nuevo-inmueble")
     public String formNuevoInmueble(Model model) {
         model.addAttribute("inmueble", new Inmueble());
         return "form_inmueble";
     }
 
+    // Guardar Inmueble
     @PostMapping("/nuevo-inmueble")
-    @Transactional 
+    @Transactional // <--- AÑADIDO
     public String guardarInmueble(@ModelAttribute Inmueble inmueble, HttpSession session) {
         initDaos();
         Usuario usuario = (Usuario) session.getAttribute("usuarioLogueado");
@@ -64,8 +67,9 @@ public class GestorInmuebles {
         return "redirect:/login";
     }
     
+    // Añadir disponibilidad
     @PostMapping("/agregar-disponibilidad")
-    @Transactional 
+    @Transactional // <--- AÑADIDO
     public String agregarDisponibilidad(@ModelAttribute Disponibilidad disponibilidad, 
                                         @RequestParam Integer idInmueble,
                                         Model model) {

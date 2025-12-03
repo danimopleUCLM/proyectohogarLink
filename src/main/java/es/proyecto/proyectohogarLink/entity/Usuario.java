@@ -59,6 +59,9 @@ public abstract class Usuario {
 	public void setDireccion(String direccion) {
 		this.direccion = direccion;
 	}
+	public String getRol() {
+	    return this.getClass().getSimpleName(); 
+	}
 
 	//To string
 	@Override

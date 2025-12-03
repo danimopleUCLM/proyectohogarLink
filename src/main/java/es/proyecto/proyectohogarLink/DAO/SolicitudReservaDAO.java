@@ -11,35 +11,27 @@ public class SolicitudReservaDAO extends AbstractEntityDAO<SolicitudReserva> {
         super(em, SolicitudReserva.class);
     }
 
-    /**
-     * Método CRÍTICO para el panel del Propietario.
-     * Busca solicitudes NO confirmadas (pendientes) de inmuebles que pertenecen al propietario logueado.
-     * Requiere navegar: Solicitud -> Reserva -> Inmueble -> Propietario
-     */
+    // Para el PROPIETARIO: Solo ver las que tiene que gestionar (Pendientes)
     public List<SolicitudReserva> buscarPendientesPorPropietario(int idPropietario) {
         String jpql = "SELECT s FROM SolicitudReserva s " +
                       "JOIN s.reserva r " +
                       "JOIN r.inmueble i " +
-                      "WHERE i.propietario.id = :pid AND s.confirmada = false";
+                      "WHERE i.propietario.id = :pid AND s.estado = 'PENDIENTE'";
         
         TypedQuery<SolicitudReserva> query = em.createQuery(jpql, SolicitudReserva.class);
         query.setParameter("pid", idPropietario);
-        
         return query.getResultList();
     }
     
-    /**
-     * Busca solicitudes confirmadas (Historial)
-     */
-    public List<SolicitudReserva> buscarConfirmadasPorPropietario(int idPropietario) {
+    // Para el INQUILINO: Ver su historial completo (Buzón de notificaciones)
+    public List<SolicitudReserva> buscarTodasPorInquilino(int idInquilino) {
         String jpql = "SELECT s FROM SolicitudReserva s " +
                       "JOIN s.reserva r " +
-                      "JOIN r.inmueble i " +
-                      "WHERE i.propietario.id = :pid AND s.confirmada = true";
+                      "WHERE r.inquilino.id = :iid " +
+                      "ORDER BY s.id DESC"; // Las más recientes primero
         
         TypedQuery<SolicitudReserva> query = em.createQuery(jpql, SolicitudReserva.class);
-        query.setParameter("pid", idPropietario);
-        
+        query.setParameter("iid", idInquilino);
         return query.getResultList();
     }
 }

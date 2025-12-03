@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Solicitud Enviada</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="d-flex align-items-center justify-content-center vh-100 bg-light">
+    <div class="text-center p-5 bg-white shadow rounded">
+        <h1 class="display-1 text-warning">⌛</h1>
+        <h2 class="mb-3">Solicitud Enviada</h2>
+        <p class="lead" th:text="${mensaje}"></p>
+        <p class="text-muted">El propietario revisará tu solicitud y te avisará.</p>
+        <a href="/buscar" class="btn btn-primary mt-3">Volver al inicio</a>
+    </div>
+	
+</body>
+</html>
