@@ -6,24 +6,24 @@
 </head>
 <body class="bg-light">
 	<nav class="navbar navbar-expand navbar-white bg-white shadow-sm sticky-top mb-4">
-	    <div class="container">
-	        <a class="navbar-brand fw-bold text-primary" href="/inicio">🏠 HogarLink</a>
-	        <div class="navbar-nav ms-auto align-items-center">
-	            
-	            <th:block th:if="${session.usuarioLogueado != null}">
-	                <span class="me-3">Hola, <b th:text="${session.usuarioLogueado.nombre}"></b></span>
-	                
-	                <a th:if="${session.usuarioLogueado.rol == 'Propietario'}" 
-	                   href="/propietario/mis-inmuebles" class="btn btn-dark btn-sm me-2">Mi Panel</a>
-	                   
-	                <a href="/logout" class="btn btn-outline-danger btn-sm">Salir</a>
-	            </th:block>
+    <div class="container">
+        <a class="navbar-brand fw-bold text-primary" href="/inicio">🏠 HogarLink</a>
+        <div class="navbar-nav ms-auto align-items-center">
+            
+            <span th:if="${session.usuarioLogueado}" class="me-3">
+                Hola, <b th:text="${session.usuarioLogueado.nombre}"></b>
+            </span>
 
-	            <a th:unless="${session.usuarioLogueado}" href="/login" class="btn btn-primary btn-sm">Entrar</a>
-	            
-	        </div>
-	    </div>
-	</nav>
+            <a th:if="${session.usuarioLogueado != null and session.usuarioLogueado.rol == 'Propietario'}" 
+               href="/propietario/mis-inmuebles" class="btn btn-dark btn-sm me-2">Mi Panel</a>
+
+            <a th:if="${session.usuarioLogueado}" href="/logout" class="btn btn-outline-danger btn-sm">Salir</a>
+
+            <a th:unless="${session.usuarioLogueado}" href="/login" class="btn btn-primary btn-sm">Entrar</a>
+            
+        </div>
+    </div>
+</nav>
 
     <div class="container">
         <div class="row">

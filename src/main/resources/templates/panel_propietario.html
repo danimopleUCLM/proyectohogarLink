@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Panel de Gestión - HogarLink</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .card-property { transition: transform 0.2s; }
+        .card-property:hover { transform: translateY(-5px); }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow">
+        <div class="container">
+            <span class="navbar-brand fw-bold">🛠 Panel Propietario</span>
+            <div class="d-flex align-items-center">
+                <span class="text-white me-3 small">Hola, <b th:text="${session.usuarioLogueado.nombre}">Propietario</b></span>
+                <a href="/buscar" class="btn btn-outline-light btn-sm me-2">Ver Web Pública</a>
+                <a href="/logout" class="btn btn-danger btn-sm">Cerrar Sesión</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container pb-5">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+            <h2 class="text-dark">Mis Propiedades</h2>
+            <div class="d-flex gap-2">
+                <a href="/propietario/solicitudes" class="btn btn-warning fw-bold">
+                    📩 Ver Solicitudes
+                </a>
+                <a href="/propietario/nuevo-inmueble" class="btn btn-success fw-bold">
+                    ➕ Dar de alta piso
+                </a>
+            </div>
+        </div>
+
+        <div th:if="${#lists.isEmpty(misInmuebles)}" class="alert alert-info text-center p-5 shadow-sm">
+            <h4>Aún no gestionas ninguna propiedad</h4>
+            <p>Empieza dando de alta tu primer alojamiento para recibir reservas.</p>
+            <a href="/propietario/nuevo-inmueble" class="btn btn-primary mt-2">Crear mi primera propiedad</a>
+        </div>
+
+        <div class="row">
+            <div class="col-12" th:each="piso : ${misInmuebles}">
+                <div class="card mb-4 shadow-sm border-0 card-property">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                        <h5 class="mb-0 text-primary fw-bold">
+                            🏠 <span th:text="${piso.direccion}">Dirección</span>
+                        </h5>
+                        <span class="badge bg-secondary" th:text="${piso.politicaCancelacion}">Política</span>
+                    </div>
+                    
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 border-end">
+                                <p class="lead mb-1">
+                                    Precio Base: <strong th:text="${piso.precioNoche}">0</strong> € / noche
+                                </p>
+                                <hr>
+                                <h6 class="text-muted fw-bold">📅 Disponibilidades publicadas:</h6>
+                                
+                                <ul class="list-group list-group-flush small" th:if="${!#lists.isEmpty(piso.disponibilidades)}">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center" th:each="d : ${piso.disponibilidades}">
+                                        <span>
+                                            Del <b th:text="${d.fechaInicio}"></b> al <b th:text="${d.fechaFin}"></b>
+                                            (<span th:text="${d.precio}"></span>€)
+                                        </span>
+                                        <span th:if="${d.directa}" class="badge bg-success">Inmediata</span>
+                                        <span th:unless="${d.directa}" class="badge bg-warning text-dark">Solicitud</span>
+                                    </li>
+                                </ul>
+                                
+                                <div th:if="${#lists.isEmpty(piso.disponibilidades)}" class="alert alert-warning py-2 mt-2 small">
+                                    ⚠ Este piso no aparece en el buscador porque no tiene fechas disponibles.
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 ps-md-4">
+                                <div class="bg-light p-3 rounded border">
+                                    <h6 class="text-primary fw-bold mb-3">⚡ Añadir nuevo rango de fechas</h6>
+                                    
+                                    <form action="/propietario/agregar-disponibilidad" method="post">
+                                        <input type="hidden" name="idInmueble" th:value="${piso.id}">
+                                        
+                                        <div class="row g-2 mb-2">
+                                            <div class="col-6">
+                                                <label class="form-label small text-muted">Desde</label>
+                                                <input type="date" name="fechaInicio" class="form-control form-control-sm" required>
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-label small text-muted">Hasta</label>
+                                                <input type="date" name="fechaFin" class="form-control form-control-sm" required>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row g-2 mb-3">
+                                            <div class="col-6">
+                                                <label class="form-label small text-muted">Precio Oferta (€)</label>
+                                                <input type="number" name="precio" th:value="${piso.precioNoche}" step="0.1" class="form-control form-control-sm" required>
+                                            </div>
+                                            <div class="col-6 d-flex align-items-end">
+                                                <div class="form-check mb-1">
+                                                    <input class="form-check-input" type="checkbox" name="directa" id="checkDirecta">
+                                                    <label class="form-check-label small" for="checkDirecta">Reserva Inmediata</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-primary btn-sm w-100 fw-bold">Publicar Disponibilidad</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
