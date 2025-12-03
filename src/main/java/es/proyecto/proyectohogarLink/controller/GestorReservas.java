@@ -7,13 +7,14 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional; // IMPORTANTE
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDate;
+import java.util.ArrayList; // Importante para listas vacías
 import java.util.List;
 
 @Controller
@@ -37,7 +38,7 @@ public class GestorReservas {
 
     // --- REALIZAR RESERVA ---
     @PostMapping("/realizarReserva")
-    @Transactional // <--- AÑADIDO: Asegura que Reserva y Pago se guarden juntos
+    @Transactional
     public String realizarReserva(
             @RequestParam Integer idInmueble,
             @RequestParam LocalDate fechaInicio,
@@ -78,18 +79,20 @@ public class GestorReservas {
                 solicitud.setConfirmada(false);
                 solicitudDAO.saveEntity(solicitud);
                 
+                System.out.println(">>> DEBUG: Solicitud creada con ID Reserva: " + reserva.getId());
+                
                 model.addAttribute("mensaje", "Solicitud enviada. Pendiente de aprobación.");
                 return "reserva_pendiente";
             }
 
         } catch (Exception e) {
-            e.printStackTrace(); // Útil para ver el error en consola si falla
+            e.printStackTrace();
             model.addAttribute("error", "Error procesando reserva: " + e.getMessage());
             return "error";
         }
     }
 
-    // --- GESTIÓN SOLICITUDES ---
+    // --- GESTIÓN SOLICITUDES (CORREGIDO CON LOGS) ---
     @GetMapping("/propietario/solicitudes")
     public String verSolicitudes(HttpSession session, Model model) {
         initDaos();
@@ -97,25 +100,55 @@ public class GestorReservas {
         if (!(usuario instanceof Propietario)) return "redirect:/login";
 
         List<SolicitudReserva> pendientes = solicitudDAO.buscarPendientesPorPropietario(usuario.getId());
+        
+        // --- BLOQUE DE DEPURACIÓN (MIRA LA CONSOLA AL ENTRAR AQUÍ) ---
+        if (pendientes == null) {
+            System.out.println(">>> DEBUG: La lista de pendientes es NULL");
+            pendientes = new ArrayList<>();
+        } else {
+            System.out.println(">>> DEBUG: Tamaño de lista recuperada: " + pendientes.size());
+            for (int i = 0; i < pendientes.size(); i++) {
+                SolicitudReserva s = pendientes.get(i);
+                if (s == null) {
+                    System.out.println(">>> DEBUG: Elemento [" + i + "] es NULL (Error de base de datos)");
+                } else {
+                    System.out.println(">>> DEBUG: Elemento [" + i + "] ID Solicitud: " + s.getId());
+                    System.out.println(">>> DEBUG:    -> Reserva asociada: " + (s.getReserva() != null ? "ID " + s.getReserva().getId() : "NULL"));
+                }
+            }
+        }
+        // -------------------------------------------------------------
+
         model.addAttribute("solicitudes", pendientes);
         return "lista_solicitudes";
     }
 
     @PostMapping("/propietario/gestionarSolicitud")
-    @Transactional // <--- AÑADIDO
+    @Transactional
     public String gestionarSolicitud(@RequestParam Integer idSolicitud, 
                                      @RequestParam boolean aceptar) {
         initDaos();
+        // Añadida validación extra por si idSolicitud llega nulo
+        if(idSolicitud == null) return "redirect:/propietario/solicitudes";
+
         SolicitudReserva solicitud = solicitudDAO.selectEntity(idSolicitud);
 
         if (solicitud != null) {
             if (aceptar) {
+                System.out.println(">>> DEBUG: Aceptando solicitud " + idSolicitud);
                 solicitud.setConfirmada(true);
                 solicitudDAO.updateEntity(solicitud);
             } else {
+                System.out.println(">>> DEBUG: Rechazando solicitud " + idSolicitud);
+                // Al borrar, aseguramos borrar la reserva también si es necesario
+                Reserva reserva = solicitud.getReserva();
                 solicitudDAO.deleteEntity(idSolicitud);
-                reservaDAO.deleteEntity(solicitud.getReserva().getId());
+                if (reserva != null) {
+                    reservaDAO.deleteEntity(reserva.getId());
+                }
             }
+        } else {
+            System.out.println(">>> DEBUG: No se encontró la solicitud con ID " + idSolicitud);
         }
         return "redirect:/propietario/solicitudes";
     }
