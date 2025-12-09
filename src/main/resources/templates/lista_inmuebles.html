@@ -3,84 +3,115 @@
 <head>
     <title>Catálogo - HogarLink</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 </head>
 <body class="bg-light d-flex flex-column min-vh-100">
 
-    <nav class="navbar navbar-expand navbar-white bg-white shadow-sm sticky-top mb-4">
+    <nav class="navbar navbar-expand navbar-white bg-white shadow-sm sticky-top">
         <div class="container">
             <a class="navbar-brand fw-bold text-primary" href="/inicio">🏠 HogarLink</a>
             <div class="navbar-nav ms-auto align-items-center">
                 
-                <span th:if="${session.usuarioLogueado}" class="me-3">
+                <span th:if="${session.usuarioLogueado}" class="me-3 small d-none d-md-inline">
                     Hola, <b th:text="${session.usuarioLogueado.nombre}"></b>
                 </span>
 
+                <a href="/wishlist/mis-deseos" class="btn btn-outline-light btn-sm me-2" style="border-color: #dc3545; color: #dc3545;">
+                    <i class="bi bi-heart-fill"></i> Wishlist
+                </a>
+
                 <a th:if="${session.usuarioLogueado != null and session.usuarioLogueado.rol == 'Propietario'}" 
-                   href="/propietario/mis-inmuebles" class="btn btn-dark btn-sm me-2">Mi Panel</a>
+                   href="/propietario/mis-inmuebles" class="btn btn-dark btn-sm me-2">⚙️ Mi Panel</a>
 
                 <a th:if="${session.usuarioLogueado != null and session.usuarioLogueado.rol == 'Inquilino'}" 
                    href="/inquilino/mis-reservas" class="btn btn-info btn-sm me-2 text-white">📬 Mis Reservas</a>
 
                 <a th:if="${session.usuarioLogueado}" href="/logout" class="btn btn-outline-danger btn-sm">Salir</a>
-
                 <a th:unless="${session.usuarioLogueado}" href="/login" class="btn btn-primary btn-sm">Entrar</a>
                 
             </div>
         </div>
     </nav>
 
-    <div class="container flex-grow-1">
+    <div class="container mt-3">
+        <div th:if="${mensajeExito}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${mensajeExito}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
+        <div th:if="${mensajeInfo}" class="alert alert-info alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-info-circle-fill me-2"></i> <span th:text="${mensajeInfo}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+
+    <div class="container flex-grow-1 mt-4">
         <div class="row">
+            
             <div class="col-md-3">
-                <div class="card shadow-sm border-0 mb-4">
+                <div class="card shadow-sm border-0 mb-4 sticky-top" style="top: 80px; z-index: 1;">
                     <div class="card-body">
-                        <h5 class="mb-3">🔍 Filtros</h5>
+                        <h5 class="mb-3 fw-bold">🔍 Filtros</h5>
                         <form action="/buscar" method="get">
                             <div class="mb-3">
-                                <label class="form-label small">Destino</label>
-                                <input type="text" name="destino" class="form-control">
+                                <label class="form-label small fw-bold text-muted">Destino</label>
+                                <input type="text" name="destino" class="form-control form-control-sm" placeholder="Ej: Madrid">
                             </div>
                             <div class="mb-3">
-                                <label class="form-label small">Precio Máximo</label>
-                                <input type="number" name="precioMax" class="form-control">
+                                <label class="form-label small fw-bold text-muted">Precio Máximo</label>
+                                <input type="number" name="precioMax" class="form-control form-control-sm" placeholder="Ej: 100">
                             </div>
                             <div class="mb-3">
-                                <label class="form-label small">Política</label>
-                                <select name="politica" class="form-select">
+                                <label class="form-label small fw-bold text-muted">Política</label>
+                                <select name="politica" class="form-select form-select-sm">
                                     <option value="">Cualquiera</option>
                                     <option value="REEMBOLSABLE">Reembolsable</option>
                                     <option value="NO_REEMBOLSABLE">No Reembolsable</option>
                                 </select>
                             </div>
-                            <button type="submit" class="btn btn-primary w-100 mb-2">Filtrar</button>
-                            <a href="/buscar" class="btn btn-outline-secondary w-100">Ver Todo</a>
+                            <button type="submit" class="btn btn-primary w-100 mb-2 btn-sm fw-bold">Filtrar Resultados</button>
+                            <a href="/buscar" class="btn btn-outline-secondary w-100 btn-sm">Limpiar Filtros</a>
                         </form>
                     </div>
                 </div>
             </div>
 
             <div class="col-md-9">
-                <h3>Alojamientos Disponibles</h3>
-                <div th:if="${#lists.isEmpty(listaInmuebles)}" class="alert alert-info">No hay resultados.</div>
+                <h3 class="mb-4 fw-bold text-secondary">Alojamientos Disponibles</h3>
+                
+                <div th:if="${#lists.isEmpty(listaInmuebles)}" class="alert alert-light border text-center py-5">
+                    <h4>😕 No hemos encontrado nada</h4>
+                    <p class="text-muted">Prueba a cambiar los filtros de búsqueda.</p>
+                </div>
 
                 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
                     <div class="col" th:each="piso : ${listaInmuebles}">
-                        <div class="card h-100 border-0 shadow-sm">
+                        <div class="card h-100 border-0 shadow-sm" style="transition: transform 0.2s;">
                             <img th:src="'https://picsum.photos/400/300?random=' + ${piso.id}" 
                                  class="card-img-top" 
                                  alt="Foto Inmueble" 
                                  style="height: 200px; object-fit: cover;">
                             
                             <div class="card-body">
-                                <h5 class="card-title text-truncate" th:text="${piso.direccion}"></h5>
+                                <h5 class="card-title text-truncate fw-bold" th:text="${piso.direccion}"></h5>
                                 <p class="text-muted small mb-2">Anfitrión: <span th:text="${piso.propietario.nombre}"></span></p>
-                                <div class="d-flex justify-content-between align-items-center">
+                                
+                                <div class="d-flex justify-content-between align-items-center mt-3">
                                     <span class="badge bg-light text-dark border" th:text="${piso.politicaCancelacion}"></span>
-                                    <span class="fw-bold fs-5" th:text="${piso.precioNoche} + '€'"></span>
+                                    <span class="fw-bold fs-5 text-primary" th:text="${piso.precioNoche} + '€'"></span>
                                 </div>
                             </div>
-                            <div class="card-footer bg-white border-0 pb-3">
-                                <a th:href="@{/detalle/{id}(id=${piso.id})}" class="btn btn-outline-primary w-100 stretched-link">Ver Disponibilidad</a>
+                            
+                            <div class="card-footer bg-white border-0 pb-3 pt-0">
+                                <form th:action="@{/wishlist/add/{id}(id=${piso.id})}" method="post" th:if="${session.usuarioLogueado}" class="mb-2">
+                                    <button class="btn btn-outline-danger w-100 btn-sm fw-bold">
+                                        <i class="bi bi-heart"></i> Añadir a Favoritos
+                                    </button>
+                                </form>
+
+                                <a th:href="@{/detalle/{id}(id=${piso.id})}" class="btn btn-primary w-100 btn-sm fw-bold">
+                                    Ver Disponibilidad
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -98,13 +129,13 @@
                 </div>
                 <div class="col-md-2 col-lg-2 col-xl-2 mx-auto mt-3">
                     <h5 class="text-uppercase mb-4 fw-bold">Productos</h5>
-                    <p><a href="/buscar" class="text-white" style="text-decoration: none;">Buscar Casa</a></p>
-                    <p><a href="/registroPropietario" class="text-white" style="text-decoration: none;">Publicar Piso</a></p>
+                    <p><a href="/buscar" class="text-white text-decoration-none">Buscar Casa</a></p>
+                    <p><a href="/registroPropietario" class="text-white text-decoration-none">Publicar Piso</a></p>
                 </div>
                 <div class="col-md-3 col-lg-2 col-xl-2 mx-auto mt-3">
                     <h5 class="text-uppercase mb-4 fw-bold">Enlaces Útiles</h5>
-                    <p><a href="/login" class="text-white" style="text-decoration: none;">Tu Cuenta</a></p>
-                    <p><a href="#" class="text-white" style="text-decoration: none;">Ayuda</a></p>
+                    <p><a href="/login" class="text-white text-decoration-none">Tu Cuenta</a></p>
+                    <p><a href="#" class="text-white text-decoration-none">Ayuda</a></p>
                 </div>
                 <div class="col-md-4 col-lg-3 col-xl-3 mx-auto mt-3">
                     <h5 class="text-uppercase mb-4 fw-bold">Contacto</h5>
@@ -115,12 +146,12 @@
             <hr class="mb-4">
             <div class="row align-items-center">
                 <div class="col-md-7 col-lg-8">
-                    <p>Copyright © 2025 Todos los derechos reservados por:
-                        <a href="#" style="text-decoration: none;"><strong class="text-primary">Tu Nombre/Grupo</strong></a>
-                    </p>
+                    <p>Copyright © 2025 Todos los derechos reservados.</p>
                 </div>
             </div>
         </div>
     </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
