@@ -20,8 +20,18 @@ public abstract class AbstractEntityDAO<T> {
      * MÉTODO saveEntity (Create)
      * SOLO persist. La transacción la maneja Spring (@Transactional).
      */
-    public void saveEntity(T entity) {
-        em.persist(entity);
+// AbstractEntityDAO.java (SOLUCIÓN RECOMENDADA)
+/**
+ * MÉTODO saveEntity (Create y Update/Attach)
+ */
+    public T saveEntity(T entity) {
+    if (entity != null) {
+        // Usa merge() para manejar correctamente entidades Transitorias (nuevas) 
+        // y Detached (existentes de la sesión o con ID asignado).
+        // También maneja la cascada de persistencia correctamente.
+        return em.merge(entity);
+    }
+    return null; // O lanza una excepción si entity es nulo
     }
 
     /**

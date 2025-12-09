@@ -14,6 +14,8 @@
                 <span th:if="${session.usuarioLogueado}" class="me-3">
                     Hola, <b th:text="${session.usuarioLogueado.nombre}"></b>
                 </span>
+                <a href="/wishlist/mis-deseos" class="btn btn-outline-light btn-sm me-2" style="border-color: red; color: red;">❤️ Wishlist</a>
+
 
                 <a th:if="${session.usuarioLogueado != null and session.usuarioLogueado.rol == 'Propietario'}" 
                    href="/propietario/mis-inmuebles" class="btn btn-dark btn-sm me-2">Mi Panel</a>
@@ -80,7 +82,11 @@
                                 </div>
                             </div>
                             <div class="card-footer bg-white border-0 pb-3">
-                                <a th:href="@{/detalle/{id}(id=${piso.id})}" class="btn btn-outline-primary w-100 stretched-link">Ver Disponibilidad</a>
+                                <form th:action="@{/wishlist/add/{id}(id=${piso.id})}" method="post" th:if="${session.usuarioLogueado}">
+                                    <button class="btn btn-outline-danger w-100 mb-2">❤️ Añadir a Wishlist</button>
+                                </form>
+
+                                <a th:href="@{/detalle/{id}(id=${piso.id})}" class="btn btn-outline-primary w-100">Ver Disponibilidad</a>
                             </div>
                         </div>
                     </div>
