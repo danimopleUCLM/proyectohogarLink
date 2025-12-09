@@ -7,11 +7,13 @@ import es.proyecto.proyectohogarLink.entity.ListaDeseos;
 import es.proyecto.proyectohogarLink.entity.Usuario;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.servlet.http.HttpServletRequest; // <--- IMPORTAR
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes; // <--- IMPORTAR
 
 @Controller
 @RequestMapping("/wishlist")
@@ -30,20 +32,35 @@ public class GestorWishlist {
 
     @PostMapping("/add/{id}")
     @Transactional
-    public String add(@PathVariable("id") Integer inmuebleId, HttpSession session) {
+    public String add(@PathVariable("id") Integer inmuebleId, 
+                      HttpSession session, 
+                      HttpServletRequest request, // Para saber de dónde venimos
+                      RedirectAttributes redirectAttributes) { // Para mostrar mensaje
         initDaos();
         Usuario user = (Usuario) session.getAttribute("usuarioLogueado");
         if (user == null) return "redirect:/login";
 
         Inmueble inmueble = inmuebleDAO.selectEntity(inmuebleId);
 
+        // Verificamos si ya existe para no duplicar
         if (listaDAO.find(user.getId(), inmuebleId) == null) {
             listaDAO.saveEntity(new ListaDeseos(user, inmueble));
+            // Mensaje de éxito
+            redirectAttributes.addFlashAttribute("mensajeExito", "❤️ ¡Guardado en favoritos!");
+        } else {
+            // Mensaje informativo si ya estaba
+            redirectAttributes.addFlashAttribute("mensajeInfo", "Ya tienes este piso en tu lista.");
         }
 
-        return "redirect:/wishlist/mis-deseos";
+        // --- LÓGICA DE REDIRECCIÓN ---
+        // Obtenemos la URL desde la que se hizo la petición
+        String referer = request.getHeader("Referer");
+        
+        // Si existe, volvemos a ella. Si no, vamos a /buscar por defecto.
+        return "redirect:" + (referer != null ? referer : "/buscar");
     }
 
+    // ... Resto de métodos (delete, lista) siguen igual ...
     @PostMapping("/delete/{id}")
     @Transactional
     public String delete(@PathVariable("id") Integer inmuebleId, HttpSession session) {
