@@ -18,7 +18,7 @@ Aquí vamos a ir añadiendo toda la información del proyecto hogarLink, vamos a
 - Sprint 4, Corrección de toda la documentación necesaria (14-20 de Octubre): Corregimos todas las cosas que nos faltaban de la documentación de cara a la primera defensa del proyecto, se corrige el README, se hace un control de versiones mejorado, y se crea un plan de gestión de configuración. Versiones:
         1.4.2 → Commit — Corrección del README.
 
-- Sprint 6, Creación de la bbdd al completo con todas las tablas y comenzar con la programación del back (21-27 de Octubre): Aquí la intención es renombrar la bbdd prueba al nombre real que usemos y añadir todas las tablas junto con sus atributos. Además crearemos las entidades en el back, junto con sus metodos correspondientes y procederemos a hacer pruebas para ver que lo implementado funcione, este sería el Sprint que nos toca la semana que viene. Versiones: Pendiente de determinar en base a lo que consigamos implementar.
+- Sprint 5, Creación de la bbdd al completo con todas las tablas y comenzar con la programación del back (21-27 de Octubre): Aquí la intención es renombrar la bbdd prueba al nombre real que usemos y añadir todas las tablas junto con sus atributos. Además crearemos las entidades en el back, junto con sus metodos correspondientes y procederemos a hacer pruebas para ver que lo implementado funcione, este sería el Sprint que nos toca la semana que viene. Versiones: Pendiente de determinar en base a lo que consigamos implementar.
 
 
 TODO ESTO SERÍAN LOS SPRINTS DE LA PRIMERA ENTREGA, A PARTIR DE AQUÍ SE CORRESPONDERÍA A LA SEGUNDA.
