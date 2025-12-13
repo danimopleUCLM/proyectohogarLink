@@ -2,6 +2,7 @@ package es.proyecto.proyectohogarLink.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 @Entity
 @Table(name = "Reservas")
@@ -33,6 +34,44 @@ public class Reserva {
     // Relación 1 a 1 con Pagos
     @OneToOne(mappedBy = "reserva", cascade = CascadeType.ALL)
     private Pago pago;
+
+    // --- LÓGICA DE NEGOCIO ---
+
+    /**
+     * Calcula el precio total de la reserva.
+     * Fórmula: (Fecha Fin - Fecha Inicio) * Precio Noche Inmueble
+     * @return El precio total calculado.
+     * @throws IllegalStateException Si faltan datos necesarios (fechas o inmueble).
+     */
+    public double calcularPrecioTotal() {
+        if (fechaInicio == null || fechaFin == null || inmueble == null) {
+            throw new IllegalStateException("Faltan datos para calcular el precio (fechas o inmueble)");
+        }
+        
+        // Calculamos los días de diferencia
+        long dias = ChronoUnit.DAYS.between(fechaInicio, fechaFin);
+        
+        // Si el precio por noche es null, asumimos 0.0 para evitar NullPointerException
+        double precioNoche = (inmueble.getPrecioNoche() != null) ? inmueble.getPrecioNoche() : 0.0;
+        
+        return dias * precioNoche;
+    }
+
+    /**
+     * Valida que las fechas de la reserva sean coherentes.
+     * La fecha de fin debe ser posterior a la de inicio.
+     * @throws IllegalArgumentException Si la fecha de fin es anterior o igual a la de inicio.
+     */
+    public void validarFechas() {
+        if (fechaInicio == null || fechaFin == null) {
+            throw new IllegalArgumentException("Las fechas no pueden ser nulas");
+        }
+        if (!fechaFin.isAfter(fechaInicio)) {
+            throw new IllegalArgumentException("La fecha de fin debe ser posterior a la fecha de inicio");
+        }
+    }
+
+    // --- GETTERS Y SETTERS ---
 
     public Integer getId() {
         return id;
