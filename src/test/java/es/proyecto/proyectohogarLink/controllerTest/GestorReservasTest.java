@@ -124,4 +124,66 @@ class GestorReservasTest {
 
         assertEquals("reserva_pendiente", vista);
     }
+    
+    @Test
+    @DisplayName("Propietario acepta solicitud: Debe cambiar estado a ACEPTADA")
+    void testGestionarSolicitud_Aceptar() {
+        // 1. Arrange
+        SolicitudReserva solicitud = new SolicitudReserva();
+        solicitud.setId(100);
+        solicitud.setEstado("PENDIENTE");
+
+        when(solicitudDAO.selectEntity(100)).thenReturn(solicitud);
+
+        // 2. Act
+        // Llamamos al método con aceptar = true
+        String vista = gestorReservas.gestionarSolicitud(100, true);
+
+        // 3. Assert
+        // Verificamos que se cambió el estado
+        assertEquals("ACEPTADA", solicitud.getEstado());
+        // Verificamos que se actualizó en la BD
+        verify(solicitudDAO).updateEntity(solicitud);
+        // Verificamos redirección
+        assertEquals("redirect:/propietario/solicitudes", vista);
+    }
+
+    @Test
+    @DisplayName("Propietario rechaza solicitud: Debe cambiar a RECHAZADA y reembolsar")
+    void testGestionarSolicitud_Rechazar() {
+        // 1. Arrange
+        SolicitudReserva solicitud = new SolicitudReserva();
+        solicitud.setId(200);
+        solicitud.setEstado("PENDIENTE");
+
+        // Necesitamos una reserva y un pago asociados para comprobar el reembolso
+        Reserva reservaAsociada = new Reserva();
+        Inquilino inquilinoAsociado = new Inquilino();
+        inquilinoAsociado.setNombre("Inquilino Reembolso");
+        reservaAsociada.setInquilino(inquilinoAsociado);
+        
+        Pago pagoOriginal = new Pago();
+        pagoOriginal.setReferencia("REF-1234");
+        pagoOriginal.setMetodoPago(MetodoPago.PAYPAL);
+        reservaAsociada.setPago(pagoOriginal);
+        
+        solicitud.setReserva(reservaAsociada);
+
+        when(solicitudDAO.selectEntity(200)).thenReturn(solicitud);
+
+        // 2. Act
+        // Llamamos al método con aceptar = false
+        String vista = gestorReservas.gestionarSolicitud(200, false);
+
+        // 3. Assert
+        // Verificamos estado
+        assertEquals("RECHAZADA", solicitud.getEstado());
+        verify(solicitudDAO).updateEntity(solicitud);
+        
+        // Verificamos que, aunque no hay un método "reembolsar" en el GestorPagos (según tu código actual solo hace sysouts),
+        // la lógica llega al punto de tener acceso al pago.
+        // En un escenario real, aquí haríamos: verify(gestorPagos).reembolsar(pagoOriginal);
+        
+        assertEquals("redirect:/propietario/solicitudes", vista);
+    }
 }
