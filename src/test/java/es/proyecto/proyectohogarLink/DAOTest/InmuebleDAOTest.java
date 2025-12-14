@@ -58,4 +58,13 @@ public class InmuebleDAOTest {
         assertEquals(list, result);
         verify(query).setParameter("propietarioId", propietarioId);
     }
+    
+    @Test
+    void testBuscarInmuebleNoExistente() {
+        // Buscamos un ID que seguro no existe (ej. negativo)
+        Inmueble resultado = inmuebleDAO.selectEntity(-999);
+        
+        // Verificamos que devuelve null y no explota
+        assertNull(resultado, "Debe devolver null si el inmueble no existe");
+    }
 }
