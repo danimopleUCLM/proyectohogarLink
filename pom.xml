@@ -11,6 +11,39 @@
         <version>3.5.6</version>
         <relativePath/>
     </parent>
+	<developers>
+    <developer>
+        <id>clanchas</id>
+        <name>Carlos Lanchas Vera</name>
+        <roles>
+            <role>Developer</role>
+        </roles>
+    </developer>
+
+    <developer>
+        <id>aduenas</id>
+        <name>Álvaro Dueñas Peula</name>
+        <roles>
+            <role>Developer</role>
+        </roles>
+    </developer>
+
+    <developer>
+        <id>dmoreno</id>
+        <name>Daniel Moreno Pleite</name>
+        <roles>
+            <role>Developer</role>
+        </roles>
+    </developer>
+
+    <developer>
+        <id>fcabanillas</id>
+        <name>Félix Enrique Cabanillas Prudencio</name>
+        <roles>
+            <role>Developer</role>
+        </roles>
+    </developer>
+</developers>
 
     <groupId>es.proyecto</groupId>
     <artifactId>proyectohogarLink</artifactId>
