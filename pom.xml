@@ -16,7 +16,7 @@
         <id>clanchas</id>
         <name>Carlos Lanchas Vera</name>
         <roles>
-            <role>Developer</role>
+            <role>Product Owner</role>
         </roles>
     </developer>
 
@@ -32,7 +32,7 @@
         <id>dmoreno</id>
         <name>Daniel Moreno Pleite</name>
         <roles>
-            <role>Developer</role>
+            <role>Scrum Master</role>
         </roles>
     </developer>
 
