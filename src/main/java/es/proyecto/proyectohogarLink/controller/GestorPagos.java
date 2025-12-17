@@ -5,7 +5,7 @@ import es.proyecto.proyectohogarLink.entity.Pago;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional; // <--- IMPORTANTE
+import org.springframework.transaction.annotation.Transactional; // IMPORTANTE
 
 import java.util.UUID;
 
@@ -16,7 +16,7 @@ public class GestorPagos {
     private EntityManager em;
     private PagoDAO pagoDAO;
 
-    @Transactional 
+    @Transactional // <--- AÑADIDO
     public Pago procesarPagoInterno(Pago datosPago) {
         if (pagoDAO == null) pagoDAO = new PagoDAO(em);
 

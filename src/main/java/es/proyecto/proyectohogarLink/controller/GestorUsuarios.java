@@ -8,7 +8,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional; // <--- IMPORTANTE
+import org.springframework.transaction.annotation.Transactional; // IMPORTANTE
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
@@ -61,7 +61,7 @@ public class GestorUsuarios {
     }
 
     @PostMapping("/registroInquilino")
-    @Transactional 
+    @Transactional // <--- AÑADIDO: Gestiona la transacción automáticamente
     public String registrarInquilino(@ModelAttribute Inquilino inquilino, Model model) {
         initDao();
         try {
@@ -85,7 +85,7 @@ public class GestorUsuarios {
     }
 
     @PostMapping("/registroPropietario")
-    @Transactional 
+    @Transactional // <--- AÑADIDO
     public String registrarPropietario(@ModelAttribute Propietario propietario, Model model) {
         initDao();
         try {

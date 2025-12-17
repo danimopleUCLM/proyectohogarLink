@@ -5,7 +5,7 @@ import es.proyecto.proyectohogarLink.entity.Inmueble;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional; // Importar esto
+import org.springframework.transaction.annotation.Transactional; // IMPORTANTE
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,9 +25,8 @@ public class GestorBusquedas {
         return "inicio";
     }
 
-    
     @GetMapping("/buscar")
-    @Transactional(readOnly = true) 
+    @Transactional(readOnly = true) // <--- AÑADIDO (Recomendado)
     public String buscarInmuebles(@RequestParam(required = false) String destino,
                                   @RequestParam(required = false) Double precioMax,
                                   @RequestParam(required = false) String politica,
@@ -41,9 +40,8 @@ public class GestorBusquedas {
         return "lista_inmuebles";
     }
     
-    // Ver detalle de un piso
     @GetMapping("/detalle/{id}")
-    @Transactional(readOnly = true) 
+    @Transactional(readOnly = true) // <--- AÑADIDO (Recomendado)
     public String verDetalle(@PathVariable Integer id, Model model) {
         if (inmuebleDAO == null) inmuebleDAO = new InmuebleDAO(em);
         
