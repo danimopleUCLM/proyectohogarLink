@@ -27,8 +27,12 @@ public class GestorReservas {
     @PersistenceContext
     private EntityManager em;
     
+    private final GestorPagos gestorPagos;
+
     @Autowired
-    private GestorPagos gestorPagos; // Necesario para simular reembolso
+    public GestorReservas(GestorPagos gestorPagos) {
+        this.gestorPagos = gestorPagos;
+    }
 
     private ReservaDAO reservaDAO;
     private SolicitudReservaDAO solicitudDAO;
