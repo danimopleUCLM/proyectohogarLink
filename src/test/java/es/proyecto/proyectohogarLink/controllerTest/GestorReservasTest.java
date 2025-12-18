@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.ui.Model;
 
+import org.springframework.test.util.ReflectionTestUtils;
 import es.proyecto.proyectohogarLink.controller.GestorReservas;
 import es.proyecto.proyectohogarLink.controller.GestorPagos;
 import es.proyecto.proyectohogarLink.DAO.ReservaDAO;
@@ -37,7 +38,6 @@ class GestorReservasTest {
     @Mock private HttpSession session;
     @Mock private Model model;
 
-    @InjectMocks
     private GestorReservas gestorReservas;
 
     // Datos de prueba
@@ -49,6 +49,16 @@ class GestorReservasTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        
+        // Instanciamos manualmente inyectando el GestorPagos por constructor
+        gestorReservas = new GestorReservas(gestorPagos);
+
+        // Inyectamos el resto de dependencias privadas usando ReflectionTestUtils (Spring Test)
+        // Esto evita que initDaos() las sobrescriba y soluciona el problema del 'em' null
+        ReflectionTestUtils.setField(gestorReservas, "em", em);
+        ReflectionTestUtils.setField(gestorReservas, "reservaDAO", reservaDAO);
+        ReflectionTestUtils.setField(gestorReservas, "solicitudDAO", solicitudDAO);
+        ReflectionTestUtils.setField(gestorReservas, "disponibilidadDAO", disponibilidadDAO);
 
         // Preparamos datos básicos
         inmueble = new Inmueble();
