@@ -186,4 +186,24 @@ class GestorReservasTest {
         
         assertEquals("redirect:/propietario/solicitudes", vista);
     }
+
+    @Test
+    @DisplayName("Debe manejar excepciones y mostrar vista de error")
+    void testRealizarReserva_Excepcion() {
+        // 1. Arrange
+        when(session.getAttribute("usuarioLogueado")).thenReturn(inquilino);
+        when(em.find(Inmueble.class, 1)).thenReturn(inmueble);
+        
+        // Simulamos una excepción inesperada en alguno de los DAOs
+        when(disponibilidadDAO.permiteReservaDirectaEnPeriodo(anyInt(), any(), any()))
+            .thenThrow(new RuntimeException("Error inesperado en BD"));
+
+        // 2. Act
+        String vista = gestorReservas.realizarReserva(1, fechaInicio, fechaFin, MetodoPago.TARJETA_CREDITO, session, model);
+
+        // 3. Assert
+        // Verificamos que se captura la excepción y se redirige a "error"
+        assertEquals("error", vista);
+        verify(model).addAttribute(eq("error"), contains("Error inesperado en BD"));
+    }
 }

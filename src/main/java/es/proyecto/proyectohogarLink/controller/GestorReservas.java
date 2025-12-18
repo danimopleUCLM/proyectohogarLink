@@ -16,8 +16,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Controller
 public class GestorReservas {
+
+    private static final Logger logger = LoggerFactory.getLogger(GestorReservas.class);
 
     @PersistenceContext
     private EntityManager em;
@@ -91,7 +96,7 @@ public class GestorReservas {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error controlando la reserva", e);
             model.addAttribute("error", "Error: " + e.getMessage());
             return "error";
         }
@@ -127,11 +132,11 @@ public class GestorReservas {
                 // Lógica de Reembolso
                 Pago pago = solicitud.getReserva().getPago();
                 if(pago != null) {
-                    System.out.println("--- REEMBOLSO REALIZADO ---");
-                    System.out.println("Devolviendo dinero a: " + solicitud.getReserva().getInquilino().getNombre());
-                    System.out.println("Referencia de pago original: " + pago.getReferencia());
-                    System.out.println("Monto devuelto al método: " + pago.getMetodoPago());
-                    System.out.println("---------------------------");
+                    logger.info("--- REEMBOLSO REALIZADO ---");
+                    logger.info("Devolviendo dinero a: {}", solicitud.getReserva().getInquilino().getNombre());
+                    logger.info("Referencia de pago original: {}", pago.getReferencia());
+                    logger.info("Monto devuelto al método: {}", pago.getMetodoPago());
+                    logger.info("---------------------------");
                 }
             }
         }
