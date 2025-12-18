@@ -20,6 +20,8 @@ import java.util.List;
 @RequestMapping("/propietario")
 public class GestorInmuebles {
 
+    private static final String REDIRECT_MIS_INMUEBLES = "redirect:/propietario/mis-inmuebles";
+
     @PersistenceContext
     private EntityManager em;
 
@@ -62,7 +64,7 @@ public class GestorInmuebles {
         if (usuario instanceof Propietario) {
             inmueble.setPropietario((Propietario) usuario);
             inmuebleDAO.saveEntity(inmueble);
-            return "redirect:/propietario/mis-inmuebles";
+            return REDIRECT_MIS_INMUEBLES;
         }
         return "redirect:/login";
     }
@@ -80,11 +82,11 @@ public class GestorInmuebles {
             
             if (disponibilidad.getFechaInicio().isAfter(disponibilidad.getFechaFin())) {
                 model.addAttribute("error", "Fechas incorrectas");
-                return "redirect:/propietario/mis-inmuebles";
+                return REDIRECT_MIS_INMUEBLES;
             }
             
             disponibilidadDAO.saveEntity(disponibilidad);
-            return "redirect:/propietario/mis-inmuebles";
+            return REDIRECT_MIS_INMUEBLES;
             
         } catch (Exception e) {
             return "error";

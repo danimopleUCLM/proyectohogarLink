@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.*;
 
 @Controller
 public class GestorUsuarios {
+    private static final String REGISTRO_INQUILINO = "registro_inquilino";
+    private static final String REGISTRO_PROPIETARIO = "registro_propietario";
+    private static final String REDIRECT_LOGIN = "redirect:/login";
 
     @PersistenceContext
     private EntityManager em;
@@ -50,14 +53,14 @@ public class GestorUsuarios {
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
-        return "redirect:/login";
+        return REDIRECT_LOGIN;
     }
 
     // --- REGISTRO INQUILINO ---
     @GetMapping("/registroInquilino")
     public String formRegistroInquilino(Model model) {
         model.addAttribute("inquilino", new Inquilino());
-        return "registro_inquilino";
+        return REGISTRO_INQUILINO;
     }
 
     @PostMapping("/registroInquilino")
@@ -67,13 +70,13 @@ public class GestorUsuarios {
         try {
             if (usuarioDAO.existeLogin(inquilino.getLogin())) {
                 model.addAttribute("error", "El usuario ya existe");
-                return "registro_inquilino";
+                return REGISTRO_INQUILINO;
             }
             usuarioDAO.saveEntity(inquilino);
-            return "redirect:/login";
+            return REDIRECT_LOGIN;
         } catch (Exception e) {
             model.addAttribute("error", "Error en registro: " + e.getMessage());
-            return "registro_inquilino";
+            return REGISTRO_INQUILINO;
         }
     }
 
@@ -81,7 +84,7 @@ public class GestorUsuarios {
     @GetMapping("/registroPropietario")
     public String formRegistroPropietario(Model model) {
         model.addAttribute("propietario", new Propietario());
-        return "registro_propietario";
+        return REGISTRO_PROPIETARIO;
     }
 
     @PostMapping("/registroPropietario")
@@ -91,13 +94,13 @@ public class GestorUsuarios {
         try {
             if (usuarioDAO.existeLogin(propietario.getLogin())) {
                 model.addAttribute("error", "El usuario ya existe");
-                return "registro_propietario";
+                return REGISTRO_PROPIETARIO;
             }
             usuarioDAO.saveEntity(propietario);
-            return "redirect:/login";
+            return REDIRECT_LOGIN;
         } catch (Exception e) {
             model.addAttribute("error", "Error en registro: " + e.getMessage());
-            return "registro_propietario";
+            return REGISTRO_PROPIETARIO;
         }
     }
 }

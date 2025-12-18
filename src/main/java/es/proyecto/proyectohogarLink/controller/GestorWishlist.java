@@ -18,6 +18,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes; // <--- I
 @Controller
 @RequestMapping("/wishlist")
 public class GestorWishlist {
+    private static final String USUARIO_LOGUEADO = "usuarioLogueado";
+    private static final String REDIRECT_LOGIN = "redirect:/login";
 
     @PersistenceContext
     private EntityManager em;
@@ -37,8 +39,8 @@ public class GestorWishlist {
                       HttpServletRequest request, // Para saber de dónde venimos
                       RedirectAttributes redirectAttributes) { // Para mostrar mensaje
         initDaos();
-        Usuario user = (Usuario) session.getAttribute("usuarioLogueado");
-        if (user == null) return "redirect:/login";
+        Usuario user = (Usuario) session.getAttribute(USUARIO_LOGUEADO);
+        if (user == null) return REDIRECT_LOGIN;
 
         Inmueble inmueble = inmuebleDAO.selectEntity(inmuebleId);
 
@@ -65,8 +67,8 @@ public class GestorWishlist {
     @Transactional
     public String delete(@PathVariable("id") Integer inmuebleId, HttpSession session) {
         initDaos();
-        Usuario user = (Usuario) session.getAttribute("usuarioLogueado");
-        if (user == null) return "redirect:/login";
+        Usuario user = (Usuario) session.getAttribute(USUARIO_LOGUEADO);
+        if (user == null) return REDIRECT_LOGIN;
 
         ListaDeseos existente = listaDAO.find(user.getId(), inmuebleId);
         if (existente != null) {
@@ -80,8 +82,8 @@ public class GestorWishlist {
     @Transactional(readOnly = true)
     public String lista(Model model, HttpSession session) {
         initDaos();
-        Usuario user = (Usuario) session.getAttribute("usuarioLogueado");
-        if (user == null) return "redirect:/login";
+        Usuario user = (Usuario) session.getAttribute(USUARIO_LOGUEADO);
+        if (user == null) return REDIRECT_LOGIN;
 
         model.addAttribute("listaDeseos", listaDAO.findByUsuario(user.getId()));
         return "wishlist";

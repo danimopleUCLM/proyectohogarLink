@@ -23,6 +23,8 @@ import org.slf4j.LoggerFactory;
 public class GestorReservas {
 
     private static final Logger logger = LoggerFactory.getLogger(GestorReservas.class);
+    private static final String USUARIO_LOGUEADO = "usuarioLogueado";
+    private static final String REDIRECT_LOGIN = "redirect:/login";
 
     @PersistenceContext
     private EntityManager em;
@@ -56,8 +58,8 @@ public class GestorReservas {
             Model model) {
 
         initDaos();
-        Usuario usuario = (Usuario) session.getAttribute("usuarioLogueado");
-        if (!(usuario instanceof Inquilino)) return "redirect:/login";
+        Usuario usuario = (Usuario) session.getAttribute(USUARIO_LOGUEADO);
+        if (!(usuario instanceof Inquilino)) return REDIRECT_LOGIN;
 
         try {
             Inquilino inquilino = (Inquilino) usuario;
@@ -110,8 +112,8 @@ public class GestorReservas {
     @GetMapping("/propietario/solicitudes")
     public String verSolicitudesPropietario(HttpSession session, Model model) {
         initDaos();
-        Usuario usuario = (Usuario) session.getAttribute("usuarioLogueado");
-        if (!(usuario instanceof Propietario)) return "redirect:/login";
+        Usuario usuario = (Usuario) session.getAttribute(USUARIO_LOGUEADO);
+        if (!(usuario instanceof Propietario)) return REDIRECT_LOGIN;
 
         List<SolicitudReserva> pendientes = solicitudDAO.buscarPendientesPorPropietario(usuario.getId());
         model.addAttribute("solicitudes", pendientes);
@@ -151,7 +153,7 @@ public class GestorReservas {
     @GetMapping("/inquilino/mis-reservas")
     public String verMisReservasInquilino(HttpSession session, Model model) {
         initDaos();
-        Usuario usuario = (Usuario) session.getAttribute("usuarioLogueado");
+        Usuario usuario = (Usuario) session.getAttribute(USUARIO_LOGUEADO);
         
         // Verificamos que sea inquilino
         if (usuario != null && "Inquilino".equals(usuario.getRol())) {
@@ -160,6 +162,6 @@ public class GestorReservas {
              return "mis_reservas_inquilino";
         }
         
-        return "redirect:/login";
+        return REDIRECT_LOGIN;
     }
 }
