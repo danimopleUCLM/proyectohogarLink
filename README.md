@@ -33,3 +33,5 @@ INSTRUCCIONES DE EJECUCIÓN
 3º Una vez el programa está corriendo, meterse en el buscador que se tenga por defecto y poner: "localhost:8080/inicio o simplemente localhost:8080" y saldrá la página de inicio y ya tendremos el sw funcionando.
 
 <img width="2880" height="1596" alt="image" src="https://github.com/user-attachments/assets/3c658270-7e44-4efb-8695-82c896c0743f" />
+
+4º Para cerrar la ejecución del programa, basta con hacer Ctrl+C
