@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Mis Favoritos - HogarLink</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        /* 1. Layout para Footer Sticky (Siempre abajo) */
+        body {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        main {
+            flex: 1; /* Ocupa todo el espacio disponible empujando el footer */
+        }
+
+        /* 2. Estilos para las Tarjetas (Cards) */
+        .property-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: none;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .property-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+        }
+
+        .card-img-wrapper {
+            position: relative;
+            height: 200px;
+            overflow: hidden;
+        }
+
+        .card-img-top {
+            height: 100%;
+            width: 100%;
+            object-fit: cover; /* Evita que la imagen se deforme */
+        }
+
+        .price-badge {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">🏠 HogarLink</a>
+            <div class="d-flex align-items-center">
+                
+                <div th:if="${session.usuarioLogueado == null}">
+                    <a href="/login" class="btn btn-outline-light btn-sm me-2">Iniciar Sesión</a>
+                    <a href="/registroInquilino" class="btn btn-primary btn-sm">Registrarse</a>
+                </div>
+
+                <div th:if="${session.usuarioLogueado != null}">
+                    <span class="text-white me-3 small d-none d-md-inline">Hola, <b th:text="${session.usuarioLogueado.nombre}">User</b></span>
+
+                    <a href="/wishlist/mis-deseos" class="btn btn-light btn-sm me-2 active fw-bold">❤️ Wishlist</a>
+                    
+                    <a th:if="${session.usuarioLogueado.rol == 'Propietario'}" 
+                       href="/propietario/mis-inmuebles" 
+                       class="btn btn-warning btn-sm me-2">⚙️ Mi Panel</a>
+
+                    <a th:if="${session.usuarioLogueado.rol == 'Inquilino'}" 
+                       href="/inquilino/mis-reservas" 
+                       class="btn btn-info btn-sm me-2 text-white">📬 Mis Reservas</a>
+                    
+                    <a href="/logout" class="btn btn-danger btn-sm">Salir</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container py-5 mt-4">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
+            <h1 class="h2 fw-bold text-secondary">
+                <i class="bi bi-heart-fill text-danger me-2"></i>Mis Favoritos
+            </h1>
+            <span class="badge bg-secondary rounded-pill" th:if="${!#lists.isEmpty(listaDeseos)}" 
+                  th:text="${#lists.size(listaDeseos) + ' guardados'}">0</span>
+        </div>
+
+        <div th:if="${#lists.isEmpty(listaDeseos)}" class="text-center py-5">
+            <div class="mb-4">
+                <i class="bi bi-folder2-open text-muted" style="font-size: 5rem; opacity: 0.5;"></i>
+            </div>
+            <h3 class="text-dark fw-bold">Tu lista de deseos está vacía</h3>
+            <p class="text-muted mb-4">Aún no has guardado ninguna casa. ¡Explora y encuentra tu hogar ideal!</p>
+            <a href="/buscar" class="btn btn-primary btn-lg shadow-sm px-4">
+                <i class="bi bi-search me-2"></i>Ir a Buscar Casas
+            </a>
+        </div>
+
+        <div th:unless="${#lists.isEmpty(listaDeseos)}" class="row g-4">
+            
+            <div class="col-md-6 col-lg-4 col-xl-3" th:each="w : ${listaDeseos}">
+                <div class="card h-100 property-card shadow-sm bg-white">
+                    
+                    <div class="card-img-wrapper">
+                        <img th:src="'https://picsum.photos/400/300?random=' + ${w.inmueble.id}" 
+                             class="card-img-top" alt="Imagen inmueble">
+                        <span class="price-badge">
+                            <span th:text="${w.inmueble.precioNoche}">0</span> €/noche
+                        </span>
+                    </div>
+
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title fw-bold text-dark text-truncate" 
+                            th:title="${w.inmueble.direccion}"
+                            th:text="${w.inmueble.direccion}">Dirección</h5>
+                        
+                        <p class="card-text text-muted small mb-3">
+                            <i class="bi bi-geo-alt-fill me-1"></i> Ubicación excelente
+                        </p>
+
+                        <div class="mt-auto d-grid gap-2">
+                            <a th:href="@{/detalle/{id}(id=${w.inmueble.id})}" class="btn btn-outline-primary fw-bold">
+                                Ver Detalles
+                            </a>
+                            
+                            <form th:action="@{/wishlist/delete/{id}(id=${w.inmueble.id})}" method="post">
+                                <button class="btn btn-link text-danger text-decoration-none w-100 btn-sm">
+                                    <i class="bi bi-trash"></i> Quitar de la lista
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div> </main>
+
+    <footer class="bg-dark text-white pt-5 pb-4">
+        <div class="container text-center text-md-start">
+            <div class="row text-center text-md-start">
+                <div class="col-md-3 col-lg-3 col-xl-3 mx-auto mt-3">
+                    <h5 class="text-uppercase mb-4 fw-bold text-primary">🏠 HogarLink</h5>
+                    <p>La plataforma líder en alquiler de viviendas.</p>
+                </div>
+                <div class="col-md-2 col-lg-2 col-xl-2 mx-auto mt-3">
+                    <h6 class="text-uppercase mb-4 fw-bold">Producto</h6>
+                    <p><a href="/buscar" class="text-white text-decoration-none">Buscar Casa</a></p>
+                </div>
+                <div class="col-md-4 col-lg-3 col-xl-3 mx-auto mt-3">
+                    <h6 class="text-uppercase mb-4 fw-bold">Contacto</h6>
+                    <p>📍 C/ Talavera, s/n, Toledo</p>
+                </div>
+            </div>
+            <hr class="mb-4">
+            <div class="row align-items-center">
+                <div class="col-md-7 col-lg-8">
+                    <p class="small mb-0">Copyright © 2025 HogarLink - Todos los derechos reservados.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
