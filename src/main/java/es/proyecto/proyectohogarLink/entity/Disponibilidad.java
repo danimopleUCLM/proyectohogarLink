@@ -23,7 +23,7 @@ public class Disponibilidad {
     private Double precio;
 
     @Column(nullable = false)
-    private Boolean directa; // true = reserva inmediata, false = requiere solicitud
+    private Boolean directa = false; // true = reserva inmediata, false = requiere solicitud
 
     @ManyToOne
     @JoinColumn(name = "inmueble_id", nullable = false)
