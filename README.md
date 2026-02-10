@@ -20,5 +20,16 @@ Aquí vamos a ir añadiendo toda la información del proyecto hogarLink, vamos a
 
 - Sprint 5, Creación de la bbdd al completo con todas las tablas y comenzar con la programación del back (21-27 de Octubre): Aquí la intención es renombrar la bbdd prueba al nombre real que usemos y añadir todas las tablas junto con sus atributos. Además crearemos las entidades en el back, junto con sus metodos correspondientes y procederemos a hacer pruebas para ver que lo implementado funcione, este sería el Sprint que nos toca la semana que viene. Versiones: Pendiente de determinar en base a lo que consigamos implementar.
 
+INSTRUCCIONES DE EJECUCIÓN
 
-TODO ESTO SERÍAN LOS SPRINTS DE LA PRIMERA ENTREGA, A PARTIR DE AQUÍ SE CORRESPONDERÍA A LA SEGUNDA.
+1º Abrir una terminal de eclipse (Cerciorarse de que estamos en la carpeta del proyecto)
+
+<img width="2202" height="260" alt="image" src="https://github.com/user-attachments/assets/11800513-eee0-453a-afa0-449972d4de4a" />
+
+2º Introducir el comando: " mvn spring-boot:run "
+
+<img width="1644" height="708" alt="image" src="https://github.com/user-attachments/assets/bceaaf99-514f-40fd-a61e-404e83df97fc" />
+
+3º Una vez el programa está corriendo, meterse en el buscador que se tenga por defecto y poner: "localhost:8080/inicio o simplemente localhost:8080" y saldrá la página de inicio y ya tendremos el sw funcionando.
+
+<img width="2880" height="1596" alt="image" src="https://github.com/user-attachments/assets/3c658270-7e44-4efb-8695-82c896c0743f" />
