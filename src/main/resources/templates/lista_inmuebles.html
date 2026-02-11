@@ -87,10 +87,13 @@
                 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
                     <div class="col" th:each="piso : ${listaInmuebles}">
                         <div class="card h-100 border-0 shadow-sm" style="transition: transform 0.2s;">
-                            <img th:src="'https://picsum.photos/400/300?random=' + ${piso.id}" 
-                                 class="card-img-top" 
-                                 alt="Foto Inmueble" 
-                                 style="height: 200px; object-fit: cover;">
+						<img th:if="${piso.imagenBase64 != null}"
+     						th:src="'data:image/jpeg;base64,' + ${piso.imagenBase64}"
+     						class="card-img-top" alt="Foto Inmueble" style="height: 200px; object-fit: cover;">
+
+						<img th:unless="${piso.imagenBase64 != null}"
+     						th:src="'https://picsum.photos/400/300?random=' + ${piso.id}"
+     						class="card-img-top" alt="Foto Aleatoria" style="height: 200px; object-fit: cover;">
                             
                             <div class="card-body">
                                 <h5 class="card-title text-truncate fw-bold" th:text="${piso.direccion}"></h5>

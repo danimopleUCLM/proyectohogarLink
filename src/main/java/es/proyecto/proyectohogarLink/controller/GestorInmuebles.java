@@ -10,10 +10,13 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional; // IMPORTANTE
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.Base64;
 import java.util.List;
 
 @Controller
@@ -39,7 +42,7 @@ public class GestorInmuebles {
         initDaos();
         Usuario usuario = (Usuario) session.getAttribute("usuarioLogueado");
         
-        if (usuario instanceof Propietario) {
+        if (usuario != null && "Propietario".equalsIgnoreCase(usuario.getRol())) {
             List<Inmueble> misInmuebles = inmuebleDAO.findByPropietario(usuario.getId());
             model.addAttribute("misInmuebles", misInmuebles);
             return "panel_propietario";
@@ -47,31 +50,52 @@ public class GestorInmuebles {
         return "redirect:/login";
     }
 
-    // Formulario Alta Inmueble
+    // Mostrar formulario
     @GetMapping("/nuevo-inmueble")
     public String formNuevoInmueble(Model model) {
         model.addAttribute("inmueble", new Inmueble());
         return "form_inmueble";
     }
 
-    // Guardar Inmueble
+    // GUARDAR CON IMAGEN
     @PostMapping("/nuevo-inmueble")
-    @Transactional // <--- AÑADIDO
-    public String guardarInmueble(@ModelAttribute Inmueble inmueble, HttpSession session) {
+    @Transactional 
+    public String guardarInmueble(@ModelAttribute Inmueble inmueble,
+                                  @RequestParam("archivoImagen") MultipartFile archivo,
+                                  HttpSession session) {
         initDaos();
-        Usuario usuario = (Usuario) session.getAttribute("usuarioLogueado");
+        Usuario usuarioSession = (Usuario) session.getAttribute("usuarioLogueado");
         
-        if (usuario instanceof Propietario) {
-            inmueble.setPropietario((Propietario) usuario);
-            inmuebleDAO.saveEntity(inmueble);
-            return REDIRECT_MIS_INMUEBLES;
+        if (usuarioSession != null && "Propietario".equalsIgnoreCase(usuarioSession.getRol())) {
+            
+            // Recargamos propietario para evitar errores de sesión
+            Propietario propietario = em.find(Propietario.class, usuarioSession.getId());
+            
+            if (propietario != null) {
+                inmueble.setPropietario(propietario);
+                
+                // Convertir imagen a Base64
+                if (!archivo.isEmpty()) {
+                    try {
+                        byte[] bytes = archivo.getBytes();
+                        String base64Image = Base64.getEncoder().encodeToString(bytes);
+                        inmueble.setImagenBase64(base64Image);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                inmuebleDAO.saveEntity(inmueble);
+                // REDIRECCIÓN CORRECTA:
+                return REDIRECT_MIS_INMUEBLES;
+            }
         }
         return "redirect:/login";
     }
     
-    // Añadir disponibilidad
+    // Método agregar disponibilidad (sin cambios)
     @PostMapping("/agregar-disponibilidad")
-    @Transactional // <--- AÑADIDO
+    @Transactional 
     public String agregarDisponibilidad(@ModelAttribute Disponibilidad disponibilidad, 
                                         @RequestParam Integer idInmueble,
                                         Model model) {
@@ -79,17 +103,13 @@ public class GestorInmuebles {
         try {
             Inmueble inmueble = inmuebleDAO.selectEntity(idInmueble);
             disponibilidad.setInmueble(inmueble);
-            
             if (disponibilidad.getFechaInicio().isAfter(disponibilidad.getFechaFin())) {
-                model.addAttribute("error", "Fechas incorrectas");
                 return REDIRECT_MIS_INMUEBLES;
             }
-            
             disponibilidadDAO.saveEntity(disponibilidad);
             return REDIRECT_MIS_INMUEBLES;
-            
         } catch (Exception e) {
-            return "error";
+            return REDIRECT_MIS_INMUEBLES;
         }
     }
 }
