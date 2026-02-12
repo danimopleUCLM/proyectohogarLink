@@ -8,6 +8,10 @@
     <div class="container py-5">
         <a href="/buscar" class="text-decoration-none mb-3 d-block">&larr; Volver al buscador</a>
         
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show shadow-sm mb-4" role="alert">
+            <strong>⚠️ Atención:</strong> <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
         <div class="row">
             <div class="col-md-7">
 				<img th:src="'https://picsum.photos/800/400?random=' + ${inmueble.id}" 
@@ -92,5 +96,6 @@
 	        </div>
 	    </div>
 	</footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

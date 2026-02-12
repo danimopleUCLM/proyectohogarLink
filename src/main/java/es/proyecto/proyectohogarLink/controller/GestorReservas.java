@@ -1,4 +1,6 @@
 package es.proyecto.proyectohogarLink.controller;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes; 
+import es.proyecto.proyectohogarLink.entity.Propietario;
 
 import es.proyecto.proyectohogarLink.DAO.*;
 import es.proyecto.proyectohogarLink.entity.*;
@@ -56,14 +58,23 @@ public class GestorReservas {
             @RequestParam LocalDate fechaFin,
             @RequestParam MetodoPago metodoPago, 
             HttpSession session,
-            Model model) {
+            Model model,
+            RedirectAttributes redirectAttributes) { // <--- AÑADIDO: Para enviar mensajes en redirects) {
 
         initDaos();
         Usuario usuarioSession = (Usuario) session.getAttribute(USUARIO_LOGUEADO);
         
         // Verificación de seguridad
-        if (usuarioSession == null || !(usuarioSession instanceof Inquilino)) {
+        if (usuarioSession == null) {
             return REDIRECT_LOGIN;
+        }
+        
+     // --- 2. NUEVA LÓGICA: SI ES PROPIETARIO -> ERROR EN LA MISMA PÁGINA ---
+        if (usuarioSession instanceof Propietario) {
+            // Guardamos el error para que se vea tras la redirección
+            redirectAttributes.addFlashAttribute("error", "Los propietarios no pueden realizar reservas. Debes entrar como Inquilino.");
+            // Redirigimos de vuelta al detalle del inmueble
+            return "redirect:/detalle/" + idInmueble;
         }
 
         try {
