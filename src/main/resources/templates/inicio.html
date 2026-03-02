@@ -33,7 +33,6 @@
 
                     <a href="/wishlist/mis-deseos" class="btn btn-outline-light btn-sm me-2">❤️ Wishlist</a>
 
-                    
                     <a th:if="${session.usuarioLogueado.rol == 'Propietario'}" 
                        href="/propietario/mis-inmuebles" 
                        class="btn btn-warning btn-sm me-2">⚙️ Mi Panel</a>
@@ -54,22 +53,39 @@
             <h1 class="display-3 fw-bold mb-3">Encuentra tu alojamiento ideal</h1>
             <p class="lead mb-4">De particular a particular. Sin complicaciones.</p>
             
-            <div class="bg-white p-4 rounded shadow-lg mx-auto text-dark" style="max-width: 800px;">
-                <form action="/buscar" method="get" class="row g-2">
-                    <div class="col-md-5">
+            <div class="bg-white p-4 rounded shadow-lg mx-auto text-dark" style="max-width: 1000px;">
+                <form action="/buscar" method="get" class="row g-2 align-items-end">
+                    
+                    <div class="col-md-4 text-start">
+                        <label class="form-label fw-bold small text-muted mb-1 px-1">Destino</label>
                         <input type="text" name="destino" class="form-control form-control-lg" placeholder="¿Dónde quieres ir?">
                     </div>
-                    <div class="col-md-3">
-                        <input type="number" name="precioMax" class="form-control form-control-lg" placeholder="Precio Máx">
+                    
+                    <div class="col-md-2 text-start">
+                        <label class="form-label fw-bold small text-muted mb-1 px-1">Llegada</label>
+                        <input type="date" name="fechaLlegada" class="form-control form-control-lg">
                     </div>
-                    <div class="col-md-4">
+                    
+                    <div class="col-md-2 text-start">
+                        <label class="form-label fw-bold small text-muted mb-1 px-1">Salida</label>
+                        <input type="date" name="fechaSalida" class="form-control form-control-lg">
+                    </div>
+                    
+                    <div class="col-md-2 text-start">
+                        <label class="form-label fw-bold small text-muted mb-1 px-1">Viajeros</label>
+                        <input type="number" name="viajeros" class="form-control form-control-lg" placeholder="¿Cuántos?" min="1">
+                    </div>
+                    
+                    <div class="col-md-2">
                         <button type="submit" class="btn btn-primary btn-lg w-100">Buscar</button>
                     </div>
+
                 </form>
                 <div class="mt-3">
                     <a href="/buscar" class="fw-bold text-decoration-none">Ver todas las propiedades &rarr;</a>
                 </div>
             </div>
+
         </div>
     </header>
 

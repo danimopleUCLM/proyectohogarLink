@@ -1,4 +1,6 @@
 package es.proyecto.proyectohogarLink.controller;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes; 
+import es.proyecto.proyectohogarLink.entity.Propietario;
 
 import es.proyecto.proyectohogarLink.DAO.*;
 import es.proyecto.proyectohogarLink.entity.*;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID; // Importante para generar la referencia del pago
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,26 +49,45 @@ public class GestorReservas {
         if (disponibilidadDAO == null) disponibilidadDAO = new DisponibilidadDAO(em);
     }
 
-    // --- REALIZAR RESERVA (Igual que antes, pero usando estado) ---
+    // --- REALIZAR RESERVA (CORREGIDO) ---
     @PostMapping("/realizarReserva")
     @Transactional
     public String realizarReserva(
             @RequestParam Integer idInmueble,
             @RequestParam LocalDate fechaInicio,
             @RequestParam LocalDate fechaFin,
-            @RequestParam MetodoPago metodoPago,
+            @RequestParam MetodoPago metodoPago, 
             HttpSession session,
-            Model model) {
+            Model model,
+            RedirectAttributes redirectAttributes) { // <--- AÑADIDO: Para enviar mensajes en redirects) {
 
         initDaos();
-        Usuario usuario = (Usuario) session.getAttribute(USUARIO_LOGUEADO);
-        if (!(usuario instanceof Inquilino)) return REDIRECT_LOGIN;
+        Usuario usuarioSession = (Usuario) session.getAttribute(USUARIO_LOGUEADO);
+        
+        // Verificación de seguridad
+        if (usuarioSession == null) {
+            return REDIRECT_LOGIN;
+        }
+        
+     // --- 2. NUEVA LÓGICA: SI ES PROPIETARIO -> ERROR EN LA MISMA PÁGINA ---
+        if (usuarioSession instanceof Propietario) {
+            // Guardamos el error para que se vea tras la redirección
+            redirectAttributes.addFlashAttribute("error", "Los propietarios no pueden realizar reservas. Debes entrar como Inquilino.");
+            // Redirigimos de vuelta al detalle del inmueble
+            return "redirect:/detalle/" + idInmueble;
+        }
 
         try {
-            Inquilino inquilino = (Inquilino) usuario;
+            // 1. Recargamos las entidades desde la BBDD para evitar errores de objetos desconectados
+            Inquilino inquilino = em.find(Inquilino.class, usuarioSession.getId());
             Inmueble inmueble = em.find(Inmueble.class, idInmueble);
             
-            // ... lógica de disponibilidad ... 
+            if (inmueble == null) {
+                model.addAttribute("error", "El inmueble seleccionado no existe.");
+                return "error"; 
+            }
+            
+            // 2. Lógica de disponibilidad
             boolean esInmediata = disponibilidadDAO.permiteReservaDirectaEnPeriodo(inmueble.getId(), fechaInicio, fechaFin);
 
             Reserva reserva = new Reserva();
@@ -74,27 +96,41 @@ public class GestorReservas {
             reserva.setInquilino(inquilino);
             reserva.setInmueble(inmueble);
 
-            reservaDAO.saveEntity(reserva);
+            // --- CORRECCIÓN CRÍTICA AQUÍ ---
+            // Capturamos el resultado de saveEntity. 
+            // Esto actualiza la variable 'reserva' con el ID generado por la base de datos.
+            reserva = reservaDAO.saveEntity(reserva);
+            
+            // Forzamos la sincronización con la BBDD para asegurar que la Reserva existe antes de asociarla al Pago
+            em.flush(); 
 
+            // 3. Crear el Pago
             Pago pago = new Pago();
             pago.setMetodoPago(metodoPago);
-            pago.setReserva(reserva);
+            pago.setReserva(reserva); // Ahora 'reserva' tiene ID válido
+            
+            // Generamos referencia obligatoria (tu entidad tiene nullable=false)
+            String referenciaGenerada = UUID.randomUUID().toString();
+            pago.setReferencia(referenciaGenerada);
+
+            // Guardamos el pago
             gestorPagos.procesarPagoInterno(pago);
 
+            // 4. Gestionar Solicitud
             if (esInmediata) {
-                // Si es inmediata, no creamos solicitud pendiente, o creamos una directamente ACEPTADA
-                // Para simplificar tu modelo, creamos solicitud ACEPTADA
                 SolicitudReserva solicitud = new SolicitudReserva();
                 solicitud.setReserva(reserva);
                 solicitud.setEstado("ACEPTADA");
                 solicitudDAO.saveEntity(solicitud);
                 
                 model.addAttribute("mensaje", "¡Reserva Confirmada Inmediatamente!");
+                model.addAttribute("referencia", referenciaGenerada);
+                
                 return "reserva_exito";
             } else {
                 SolicitudReserva solicitud = new SolicitudReserva();
                 solicitud.setReserva(reserva);
-                solicitud.setEstado("PENDIENTE"); // Se queda esperando al propietario
+                solicitud.setEstado("PENDIENTE");
                 solicitudDAO.saveEntity(solicitud);
                 
                 model.addAttribute("mensaje", "Solicitud enviada. Pendiente de aprobación.");
@@ -102,18 +138,19 @@ public class GestorReservas {
             }
 
         } catch (Exception e) {
-            logger.error("Error controlando la reserva", e);
-            model.addAttribute("error", "Error: " + e.getMessage());
-            return "error";
+            logger.error("Error realizando la reserva", e);
+            // IMPORTANTE: Si salta error, mostramos el mensaje en pantalla
+            model.addAttribute("error", "Error procesando la reserva: " + e.getMessage());
+            return "error"; // Asegúrate de tener una vista error.html o redirigir a inicio
         }
     }
 
-    // --- VISTA PROPIETARIO (Gestionar) ---
+    // --- VISTA PROPIETARIO ---
     @GetMapping("/propietario/solicitudes")
     public String verSolicitudesPropietario(HttpSession session, Model model) {
         initDaos();
         Usuario usuario = (Usuario) session.getAttribute(USUARIO_LOGUEADO);
-        if (!(usuario instanceof Propietario)) return REDIRECT_LOGIN;
+        if (usuario == null || !"Propietario".equals(usuario.getRol())) return REDIRECT_LOGIN;
 
         List<SolicitudReserva> pendientes = solicitudDAO.buscarPendientesPorPropietario(usuario.getId());
         model.addAttribute("solicitudes", pendientes);
@@ -135,27 +172,26 @@ public class GestorReservas {
                 solicitud.setEstado("RECHAZADA");
                 solicitudDAO.updateEntity(solicitud);
                 
-                // Lógica de Reembolso
-                Pago pago = solicitud.getReserva().getPago();
-                if(pago != null) {
-                    logger.info("--- REEMBOLSO REALIZADO ---");
-                    logger.info("Devolviendo dinero a: {}", solicitud.getReserva().getInquilino().getNombre());
-                    logger.info("Referencia de pago original: {}", pago.getReferencia());
-                    logger.info("Monto devuelto al método: {}", pago.getMetodoPago());
-                    logger.info("---------------------------");
+                try {
+                    Pago pago = solicitud.getReserva().getPago();
+                    if(pago != null) {
+                        logger.info("--- REEMBOLSO SIMULADO ---");
+                        logger.info("Devolviendo referencia: {}", pago.getReferencia());
+                    }
+                } catch (Exception e) {
+                    logger.warn("No se pudo procesar reembolso o no hay pago asociado");
                 }
             }
         }
         return "redirect:/propietario/solicitudes";
     }
 
-    // --- NUEVO: VISTA INQUILINO (Buzón de notificaciones) ---
+    // --- VISTA INQUILINO ---
     @GetMapping("/inquilino/mis-reservas")
     public String verMisReservasInquilino(HttpSession session, Model model) {
         initDaos();
         Usuario usuario = (Usuario) session.getAttribute(USUARIO_LOGUEADO);
         
-        // Verificamos que sea inquilino
         if (usuario != null && "Inquilino".equals(usuario.getRol())) {
              List<SolicitudReserva> misSolicitudes = solicitudDAO.buscarTodasPorInquilino(usuario.getId());
              model.addAttribute("misSolicitudes", misSolicitudes);

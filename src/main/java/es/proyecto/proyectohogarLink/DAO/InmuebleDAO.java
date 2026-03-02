@@ -3,44 +3,33 @@ package es.proyecto.proyectohogarLink.DAO;
 import es.proyecto.proyectohogarLink.entity.Inmueble;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
+import java.time.LocalDate;
 import java.util.List;
 
-// Hereda de AbstractEntityDAO, pasándole la clase Inmueble
 public class InmuebleDAO extends AbstractEntityDAO<Inmueble> {
 
-    // El DAO necesita saber con qué entidad trabajar
     public InmuebleDAO(EntityManager em) {
-        // Llama al constructor del padre: AbstractEntityDAO(em, Inmueble.class)
         super(em, Inmueble.class);
     }
 
-    // --- MÉTODOS ESPECÍFICOS DEL NEGOCIO ---
-    
-    /**
-     * Permite buscar inmuebles por dirección (destino) y filtrar por precio máximo
-     * y la política de cancelación. 
-     * @param destino Parte de la dirección a buscar.
-     * @param precioMax Precio máximo por noche.
-     * @param politicaCancelacion Filtro opcional por tipo de política.
-     * @return Lista de Inmuebles que cumplen los criterios.
-     */
-    public List<Inmueble> buscarPorFiltros(String destino, Double precioMax, String politicaCancelacion) {
+    public List<Inmueble> buscarPorFiltros(String destino, LocalDate fechaLlegada, LocalDate fechaSalida, Integer viajeros) {
         
-        StringBuilder jpql = new StringBuilder("SELECT i FROM Inmueble i WHERE 1=1");
+        StringBuilder jpql = new StringBuilder("SELECT DISTINCT i FROM Inmueble i WHERE 1=1");
         
-        // 1. Filtrar por Destino (Dirección)
+        // 1. Filtrar por Destino
         if (destino != null && !destino.trim().isEmpty()) {
-            jpql.append(" AND i.direccion LIKE :destino");
+            jpql.append(" AND LOWER(i.direccion) LIKE LOWER(:destino)");
         }
         
-        // 2. Filtrar por Precio
-        if (precioMax != null && precioMax > 0) {
-            jpql.append(" AND i.precioNoche <= :precioMax");
+        // 2. Filtrar por Fechas
+        if (fechaLlegada != null && fechaSalida != null) {
+            jpql.append(" AND EXISTS (SELECT d FROM Disponibilidad d WHERE d.inmueble = i ")
+                .append(" AND d.fechaInicio <= :fechaLlegada AND d.fechaFin >= :fechaSalida)");
         }
-        
-        // 3. Filtrar por Política de Cancelación
-        if (politicaCancelacion != null && !politicaCancelacion.trim().isEmpty()) {
-            jpql.append(" AND i.politicaCancelacion = :politica");
+
+        // 3. Filtrar por Número de Viajeros (Ya activado)
+        if (viajeros != null && viajeros > 0) {
+            jpql.append(" AND i.capacidad >= :viajeros");
         }
         
         TypedQuery<Inmueble> query = em.createQuery(jpql.toString(), Inmueble.class);
@@ -49,23 +38,19 @@ public class InmuebleDAO extends AbstractEntityDAO<Inmueble> {
         if (destino != null && !destino.trim().isEmpty()) {
             query.setParameter("destino", "%" + destino + "%");
         }
-        if (precioMax != null && precioMax > 0) {
-            query.setParameter("precioMax", precioMax);
+        
+        if (fechaLlegada != null && fechaSalida != null) {
+            query.setParameter("fechaLlegada", fechaLlegada);
+            query.setParameter("fechaSalida", fechaSalida);
         }
-        if (politicaCancelacion != null && !politicaCancelacion.trim().isEmpty()) {
-            // Aseguramos que el String coincida con el Enum (case-sensitive)
-            query.setParameter("politica", politicaCancelacion); 
+
+        if (viajeros != null && viajeros > 0) {
+            query.setParameter("viajeros", viajeros);
         }
 
         return query.getResultList();
     }
     
-    /**
-     * Recupera todos los inmuebles que pertenecen a un propietario específico.
-     * Útil para el panel de gestión del Propietario.
-     * @param propietarioId ID del Propietario.
-     * @return Lista de Inmuebles.
-     */
     public List<Inmueble> findByPropietario(int propietarioId) {
         TypedQuery<Inmueble> query = em.createQuery(
             "SELECT i FROM Inmueble i WHERE i.propietario.id = :propietarioId", 

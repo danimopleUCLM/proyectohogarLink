@@ -58,16 +58,16 @@
                                 <input type="text" name="destino" class="form-control form-control-sm" placeholder="Ej: Madrid">
                             </div>
                             <div class="mb-3">
-                                <label class="form-label small fw-bold text-muted">Precio Máximo</label>
-                                <input type="number" name="precioMax" class="form-control form-control-sm" placeholder="Ej: 100">
+                                <label class="form-label small fw-bold text-muted">Llegada</label>
+                                <input type="date" name="fechaLlegada" class="form-control form-control-sm">
                             </div>
                             <div class="mb-3">
-                                <label class="form-label small fw-bold text-muted">Política</label>
-                                <select name="politica" class="form-select form-select-sm">
-                                    <option value="">Cualquiera</option>
-                                    <option value="REEMBOLSABLE">Reembolsable</option>
-                                    <option value="NO_REEMBOLSABLE">No Reembolsable</option>
-                                </select>
+                                <label class="form-label small fw-bold text-muted">Salida</label>
+                                <input type="date" name="fechaSalida" class="form-control form-control-sm">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">Viajeros</label>
+                                <input type="number" name="viajeros" class="form-control form-control-sm" placeholder="Ej: 2" min="1">
                             </div>
                             <button type="submit" class="btn btn-primary w-100 mb-2 btn-sm fw-bold">Filtrar Resultados</button>
                             <a href="/buscar" class="btn btn-outline-secondary w-100 btn-sm">Limpiar Filtros</a>
@@ -87,14 +87,22 @@
                 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
                     <div class="col" th:each="piso : ${listaInmuebles}">
                         <div class="card h-100 border-0 shadow-sm" style="transition: transform 0.2s;">
-                            <img th:src="'https://picsum.photos/400/300?random=' + ${piso.id}" 
-                                 class="card-img-top" 
-                                 alt="Foto Inmueble" 
-                                 style="height: 200px; object-fit: cover;">
+                            
+                            <img th:if="${piso.imagenBase64 != null}"
+                                th:src="'data:image/jpeg;base64,' + ${piso.imagenBase64}"
+                                class="card-img-top" alt="Foto Inmueble" style="height: 200px; object-fit: cover;">
+
+                            <img th:unless="${piso.imagenBase64 != null}"
+                                th:src="'https://picsum.photos/400/300?random=' + ${piso.id}"
+                                class="card-img-top" alt="Foto Aleatoria" style="height: 200px; object-fit: cover;">
                             
                             <div class="card-body">
                                 <h5 class="card-title text-truncate fw-bold" th:text="${piso.direccion}"></h5>
                                 <p class="text-muted small mb-2">Anfitrión: <span th:text="${piso.propietario.nombre}"></span></p>
+                                
+                                <p class="text-secondary small mb-2">
+                                    <i class="bi bi-people-fill"></i> Capacidad: <span th:text="${piso.capacidad}"></span> viajero(s)
+                                </p>
                                 
                                 <div class="d-flex justify-content-between align-items-center mt-3">
                                     <span class="badge bg-light text-dark border" th:text="${piso.politicaCancelacion}"></span>

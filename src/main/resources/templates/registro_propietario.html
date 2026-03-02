@@ -14,7 +14,6 @@
             box-shadow: 0 10px 20px rgba(0,0,0,0.1); 
             border: none;
         }
-        /* Color distinto para Propietarios (Oscuro/Negro) */
         .card-header { 
             background: #212529; 
             color: white; 
@@ -62,9 +61,26 @@
                             <label class="form-label">Apellidos</label>
                             <input type="text" name="apellidos" class="form-control">
                         </div>
-                        <div class="col-12">
-                            <label class="form-label">Dirección Fiscal</label>
-                            <input type="text" name="direccion" class="form-control" placeholder="Dirección...">
+
+                        <div class="col-md-8">
+                            <label class="form-label">Calle / Avenida Fiscal</label>
+                            <input type="text" name="calle" class="form-control" placeholder="Ej: C/ Mayor">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Número/Piso</label>
+                            <input type="text" name="numero" class="form-control" placeholder="Ej: 12, 3ºB">
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label">Localidad</label>
+                            <input type="text" name="localidad" class="form-control" placeholder="Ej: Toledo">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Provincia</label>
+                            <input type="text" name="provincia" class="form-control" placeholder="Ej: Toledo">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">C. Postal</label>
+                            <input type="text" name="codigoPostal" class="form-control" placeholder="Ej: 45001">
                         </div>
                     </div>
 
