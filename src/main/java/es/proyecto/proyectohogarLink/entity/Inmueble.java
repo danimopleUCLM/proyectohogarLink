@@ -17,6 +17,10 @@ public class Inmueble {
 
     @Column(name = "precio_noche", nullable = false)
     private Double precioNoche;
+    
+    // --- CAMPO NUEVO: CAPACIDAD ---
+    @Column(name = "capacidad")
+    private Integer capacidad = 1;
 
     // Enum corregido
     @Enumerated(EnumType.STRING)
@@ -47,6 +51,9 @@ public class Inmueble {
     
     public Double getPrecioNoche() { return precioNoche; }
     public void setPrecioNoche(Double precioNoche) { this.precioNoche = precioNoche; }
+    
+    public Integer getCapacidad() { return capacidad; }
+    public void setCapacidad(Integer capacidad) { this.capacidad = capacidad; }
     
     public PoliticaCancelacion getPoliticaCancelacion() { return politicaCancelacion; }
     public void setPoliticaCancelacion(PoliticaCancelacion politicaCancelacion) { this.politicaCancelacion = politicaCancelacion; }

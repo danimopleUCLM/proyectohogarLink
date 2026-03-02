@@ -4,7 +4,6 @@
     <title>Registro Inquilino - HogarLink</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* HE QUITADO 'display: flex' de aquí para que no rompa el footer */
         body { 
             background-color: #f4f6f9; 
         }
@@ -62,9 +61,26 @@
                             <label class="form-label">Apellidos</label>
                             <input type="text" name="apellidos" class="form-control">
                         </div>
-                        <div class="col-12">
-                            <label class="form-label">Dirección</label>
-                            <input type="text" name="direccion" class="form-control" placeholder="Calle, Ciudad...">
+                        
+                        <div class="col-md-8">
+                            <label class="form-label">Calle / Avenida</label>
+                            <input type="text" name="calle" class="form-control" placeholder="Ej: C/ Mayor">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Número/Piso</label>
+                            <input type="text" name="numero" class="form-control" placeholder="Ej: 12, 3ºB">
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label">Localidad</label>
+                            <input type="text" name="localidad" class="form-control" placeholder="Ej: Toledo">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Provincia</label>
+                            <input type="text" name="provincia" class="form-control" placeholder="Ej: Toledo">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">C. Postal</label>
+                            <input type="text" name="codigoPostal" class="form-control" placeholder="Ej: 45001">
                         </div>
                     </div>
 
