@@ -8,9 +8,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
+
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.time.LocalDate; // ¡Importación nueva necesaria para las fechas!
 
 import es.proyecto.proyectohogarLink.DAO.InmuebleDAO;
 import es.proyecto.proyectohogarLink.entity.Inmueble;
@@ -33,30 +34,27 @@ public class InmuebleDAOTest {
 
     @Test
     public void testBuscarPorFiltros() {
-        // 1. Preparamos los DATOS NUEVOS que exige el método ahora
+        // 1. Configuramos los parámetros que espera el DAO
         String destino = "Madrid";
-        LocalDate fechaInicio = LocalDate.of(2026, 6, 10);
-        LocalDate fechaFin = LocalDate.of(2026, 6, 15);
-        Integer huespedes = 2;
+        LocalDate fechaLlegada = LocalDate.of(2026, 7, 1);
+        LocalDate fechaSalida = LocalDate.of(2026, 7, 10);
+        Integer viajeros = 2;
         List<Inmueble> list = new ArrayList<>();
         
-        // 2. Comportamiento simulado (Mocks)
         when(em.createQuery(anyString(), eq(Inmueble.class))).thenReturn(query);
-        // Añadimos esto para evitar fallos si el código real encadena los setParameter
+        // Configuramos el encadenamiento de setParameter para evitar errores
         when(query.setParameter(anyString(), any())).thenReturn(query);
         when(query.getResultList()).thenReturn(list);
         
-        // 3. Ejecutamos el método con la NUEVA firma
-        List<Inmueble> result = inmuebleDAO.buscarPorFiltros(destino, fechaInicio, fechaFin, huespedes);
+        // 2. Llamamos al método
+        List<Inmueble> result = inmuebleDAO.buscarPorFiltros(destino, fechaLlegada, fechaSalida, viajeros);
         
-        // 4. Verificaciones
+        // 3. Verificaciones
         assertEquals(list, result);
-        
-        // Verificamos que se pasan los parámetros correctos a la consulta con los nombres EXACTOS del DAO
         verify(query).setParameter("destino", "%" + destino + "%");
-        verify(query).setParameter("fechaLlegada", fechaInicio);
-        verify(query).setParameter("fechaSalida", fechaFin);
-        verify(query).setParameter("viajeros", huespedes);
+        verify(query).setParameter("fechaLlegada", fechaLlegada);
+        verify(query).setParameter("fechaSalida", fechaSalida);
+        verify(query).setParameter("viajeros", viajeros);
     }
 
     @Test
@@ -75,7 +73,7 @@ public class InmuebleDAOTest {
     
     @Test
     void testBuscarInmuebleNoExistente() {
-        // Buscamos un ID que seguro no existe (ej. negativo)
+        // Buscamos un ID que seguro no existe
         Inmueble resultado = inmuebleDAO.selectEntity(-999);
         
         // Verificamos que devuelve null y no explota

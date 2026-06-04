@@ -11,39 +11,37 @@
         <version>3.5.6</version>
         <relativePath/>
     </parent>
-	<developers>
-    <developer>
-        <id>clanchas</id>
-        <name>Carlos Lanchas Vera</name>
-        <roles>
-            <role>Product Owner</role>
-        </roles>
-    </developer>
-
-    <developer>
-        <id>aduenas</id>
-        <name>Álvaro Dueñas Peula</name>
-        <roles>
-            <role>Developer</role>
-        </roles>
-    </developer>
-
-    <developer>
-        <id>dmoreno</id>
-        <name>Daniel Moreno Pleite</name>
-        <roles>
-            <role>Scrum Master</role>
-        </roles>
-    </developer>
-
-    <developer>
-        <id>fcabanillas</id>
-        <name>Félix Enrique Cabanillas Prudencio</name>
-        <roles>
-            <role>Developer</role>
-        </roles>
-    </developer>
-</developers>
+    
+    <developers>
+        <developer>
+            <id>clanchas</id>
+            <name>Carlos Lanchas Vera</name>
+            <roles>
+                <role>Product Owner</role>
+            </roles>
+        </developer>
+        <developer>
+            <id>aduenas</id>
+            <name>Álvaro Dueñas Peula</name>
+            <roles>
+                <role>Developer</role>
+            </roles>
+        </developer>
+        <developer>
+            <id>dmoreno</id>
+            <name>Daniel Moreno Pleite</name>
+            <roles>
+                <role>Scrum Master</role>
+            </roles>
+        </developer>
+        <developer>
+            <id>fcabanillas</id>
+            <name>Félix Enrique Cabanillas Prudencio</name>
+            <roles>
+                <role>Developer</role>
+            </roles>
+        </developer>
+    </developers>
 
     <groupId>es.proyecto</groupId>
     <artifactId>proyectohogarLink</artifactId>
@@ -53,35 +51,31 @@
 
     <properties>
         <java.version>21</java.version>
+        
+        <sonar.projectKey>HogarLink</sonar.projectKey>
+        <sonar.organization>grupo06</sonar.organization>
+        <sonar.host.url>http://172.20.48.132:9000</sonar.host.url>
+        <sonar.login>sqp_b7dd5425634add70e2b8395828beaa9ce38733e5</sonar.login>
     </properties>
 
     <dependencies>
-        <!-- Spring Boot Web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-
-        <!-- Thymeleaf -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
-
-        <!-- Spring Data JPA -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
-
-        <!-- SQLite JDBC -->
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
             <version>3.42.0.0</version>
         </dependency>
-
-        <!-- Tests -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -91,25 +85,27 @@
 
     <build>
         <plugins>
-            <!-- Plugin Spring Boot -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
-            <!-- 1. Plugin Surefire (Ejecución de Tests) -->
-            <!-- Spring Boot ya lo incluye, pero lo configuramos explícitamente -->
+            
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>4.0.0.4121</version>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
             </plugin>
 
-            <!-- 2. Plugin JaCoCo (Cobertura de Código) -->
-            <!-- Esencial para ver qué % de código cubren tus tests -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.11</version>
+                <version>0.8.13</version>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
@@ -127,7 +123,6 @@
                 </executions>
             </plugin>
 
-            <!-- 3. Plugin Maven Site (Generación de Web del Proyecto) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
@@ -135,20 +130,18 @@
             </plugin>
         </plugins>
     </build>
+    
     <reporting>
         <plugins>
-            <!-- Genera el informe visual de los Tests (Surefire Report) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-report-plugin</artifactId>
                 <version>3.2.5</version>
             </plugin>
-
-            <!-- Genera el informe visual de Cobertura (JaCoCo) -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.11</version>
+                <version>0.8.13</version>
                 <reportSets>
                     <reportSet>
                         <reports>
@@ -157,8 +150,6 @@
                     </reportSet>
                 </reportSets>
             </plugin>
-            
-            <!-- Permite ver el código fuente en los informes (JXR) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jxr-plugin</artifactId>
