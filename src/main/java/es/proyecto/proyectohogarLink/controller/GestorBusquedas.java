@@ -40,10 +40,14 @@ public class GestorBusquedas {
             inmuebleDAO = new InmuebleDAO(em);
         }
         
-        // Llamada actualizada al DAO con los nuevos parámetros del buscador
+        // Llamada al DAO
         List<Inmueble> resultados = inmuebleDAO.buscarPorFiltros(destino, fechaLlegada, fechaSalida, viajeros);
         
+        // Atributos necesarios para el test y para la vista
         model.addAttribute("listaInmuebles", resultados);
+        model.addAttribute("destinoBuscado", destino);
+        model.addAttribute("huespedes", viajeros);
+        
         return "lista_inmuebles";
     }
     
