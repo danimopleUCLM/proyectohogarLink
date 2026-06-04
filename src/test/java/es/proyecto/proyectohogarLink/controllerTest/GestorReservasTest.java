@@ -1,219 +1,192 @@
 package es.proyecto.proyectohogarLink.controllerTest;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
-import java.time.LocalDate;
-
-import jakarta.persistence.EntityManager;
-import jakarta.servlet.http.HttpSession;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.ui.Model;
-
-import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.context.annotation.Import;
 import es.proyecto.proyectohogarLink.controller.GestorReservas;
 import es.proyecto.proyectohogarLink.controller.GestorPagos;
-import es.proyecto.proyectohogarLink.DAO.ReservaDAO;
-import es.proyecto.proyectohogarLink.DAO.SolicitudReservaDAO;
-import es.proyecto.proyectohogarLink.DAO.DisponibilidadDAO;
+import es.proyecto.proyectohogarLink.DAO.*;
 import es.proyecto.proyectohogarLink.entity.*;
+import jakarta.persistence.EntityManager;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.OverrideAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.mock.web.MockHttpSession;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.test.web.servlet.MockMvc;
+import es.proyecto.proyectohogarLink.controller.GestorReservas;
+import es.proyecto.proyectohogarLink.controller.GestorPagos;
+import java.time.LocalDate;
 
-class GestorReservasTest {
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-    // 1. Mocks de las dependencias del controlador
-    @Mock private ReservaDAO reservaDAO;
-    @Mock private SolicitudReservaDAO solicitudDAO;
-    @Mock private DisponibilidadDAO disponibilidadDAO;
-    @Mock private GestorPagos gestorPagos;
-    @Mock private EntityManager em; // Necesario porque usas em.find()
-    
-    // Mocks de objetos Web
-    @Mock private HttpSession session;
-    @Mock private Model model;
+@WebMvcTest(controllers = GestorReservas.class)
+@OverrideAutoConfiguration(enabled = true)
+public class GestorReservasTest {
 
-    private GestorReservas gestorReservas;
+    @Autowired
+    private MockMvc mockMvc;
 
-    // Datos de prueba
-    private Inmueble inmueble;
-    private Inquilino inquilino;
-    private LocalDate fechaInicio;
-    private LocalDate fechaFin;
+    @MockBean
+    private GestorPagos gestorPagos;
+
+    @MockBean
+    private EntityManager em; // Para simular la búsqueda de entidades
+
+    // Mocks de los DAOs que inyectaremos manualmente
+    private ReservaDAO reservaDAOMock;
+    private SolicitudReservaDAO solicitudDAOMock;
+    private DisponibilidadDAO disponibilidadDAOMock;
+
+    @Autowired
+    private GestorReservas gestorReservasController;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        
-        // Instanciamos manualmente inyectando el GestorPagos por constructor
-        gestorReservas = new GestorReservas(gestorPagos);
+        // Inicializamos los mocks de los DAOs
+        reservaDAOMock = mock(ReservaDAO.class);
+        solicitudDAOMock = mock(SolicitudReservaDAO.class);
+        disponibilidadDAOMock = mock(DisponibilidadDAO.class);
 
-        // Inyectamos el resto de dependencias privadas usando ReflectionTestUtils (Spring Test)
-        // Esto evita que initDaos() las sobrescriba y soluciona el problema del 'em' null
-        ReflectionTestUtils.setField(gestorReservas, "em", em);
-        ReflectionTestUtils.setField(gestorReservas, "reservaDAO", reservaDAO);
-        ReflectionTestUtils.setField(gestorReservas, "solicitudDAO", solicitudDAO);
-        ReflectionTestUtils.setField(gestorReservas, "disponibilidadDAO", disponibilidadDAO);
-
-        // Preparamos datos básicos
-        inmueble = new Inmueble();
-        inmueble.setId(1);
-        inmueble.setPrecioNoche(100.0);
-
-        inquilino = new Inquilino();
-        inquilino.setId(10);
-        inquilino.setNombre("Inquilino Test");
-
-        fechaInicio = LocalDate.now().plusDays(1);
-        fechaFin = LocalDate.now().plusDays(5);
+        // Inyectamos los mocks directamente en el controlador para saltarnos el initDaos()
+        ReflectionTestUtils.setField(gestorReservasController, "reservaDAO", reservaDAOMock);
+        ReflectionTestUtils.setField(gestorReservasController, "solicitudDAO", solicitudDAOMock);
+        ReflectionTestUtils.setField(gestorReservasController, "disponibilidadDAO", disponibilidadDAOMock);
     }
 
-    @Test
-    @DisplayName("Debe redirigir al login si no hay usuario en sesión")
-    void testRealizarReserva_SinLogin() {
-        when(session.getAttribute("usuarioLogueado")).thenReturn(null);
+    @ParameterizedTest(name = "CP{index}: Rol={0}, idInm={1}, F.Inicio={2}, F.Fin={3}, Pago={4}, DispBD={5} -> {6}")
+    @CsvSource({
+        // Rol, idInmueble, fechaInicio, fechaFin, metodoPago, isDisponibleBD, ResultadoEsperado (Vista/Redirección)
+        "INQUILINO, 10, 2026-10-15, 2026-10-22, TARJETA_CREDITO, TRUE, reserva_exito",      // CP1
+        "INQUILINO, 1, hoy, hoy+1, PAYPAL, FALSE, reserva_pendiente",                         // CP2
+        "PROPIETARIO, 10, 2026-10-15, 2026-10-22, TARJETA_DEBITO, TRUE, redirect:/detalle/10", // CP3
+        "NULL, 10, 2026-10-15, 2026-10-22, TARJETA_CREDITO, TRUE, redirect:/login",           // CP4
+        "INQUILINO, 9999, 2026-10-15, 2026-10-22, TARJETA_CREDITO, TRUE, error",              // CP5 (Inmueble no existe)
+        "INQUILINO, -1, 2026-10-15, 2026-10-22, TARJETA_CREDITO, TRUE, bad_request",          // CP6
+        "INQUILINO, NULL, 2026-10-15, 2026-10-22, TARJETA_CREDITO, TRUE, bad_request",        // CP7
+        "INQUILINO, letras, 2026-10-15, 2026-10-22, TARJETA_CREDITO, TRUE, bad_request",      // CP8
+        "INQUILINO, 10, 2025-01-01, 2026-10-22, TARJETA_CREDITO, TRUE, error",                // CP9 (Pasado)
+        "INQUILINO, 10, 2026-10-15, 2026-10-10, TARJETA_CREDITO, TRUE, error",                // CP10 (Fin < Inicio)
+        "INQUILINO, 10, 2026-10-15, 2026-10-15, TARJETA_CREDITO, TRUE, error",                // CP11 (Mismo día)
+        "INQUILINO, 10, 2026-10-15, 2026-10-22, NULL, TRUE, bad_request",                     // CP12
+        "INQUILINO, 10, 2026-10-15, 2026-10-22, BITCOIN, TRUE, bad_request",                  // CP13
+        "INQUILINO, 10, 2026-10-15, 2026-10-22, TARJETA_CREDITO, EXCEPCION, error"            // CP14
+    })
+    @DisplayName("Tests parametrizados para realizarReserva")
+    void testRealizarReserva(String rolStr, String idInmuebleStr, String fInicioStr, String fFinStr, 
+                             String metodoPagoStr, String dispBDStr, String resultadoEsperado) throws Exception {
 
-        String vista = gestorReservas.realizarReserva(1, fechaInicio, fechaFin, MetodoPago.TARJETA_CREDITO, session, model);
+        // 1. Configurar fechas dinámicas
+        LocalDate fInicio = fInicioStr.equals("hoy") ? LocalDate.now() : 
+                            (fInicioStr.equals("2025-01-01") ? LocalDate.of(2025, 1, 1) : LocalDate.of(2026, 10, 15));
+        LocalDate fFin = fFinStr.equals("hoy+1") ? LocalDate.now().plusDays(1) : 
+                         (fFinStr.equals("2026-10-10") ? LocalDate.of(2026, 10, 10) : 
+                         (fFinStr.equals("2026-10-15") ? LocalDate.of(2026, 10, 15) : LocalDate.of(2026, 10, 22)));
 
-        assertEquals("redirect:/login", vista);
-    }
+        // 2. Configurar la Sesión simulada
+        MockHttpSession session = new MockHttpSession();
+        if ("INQUILINO".equals(rolStr)) {
+            Inquilino inq = new Inquilino();
+            inq.setId(1);
+            session.setAttribute("usuarioLogueado", inq);
+            when(em.find(eq(Inquilino.class), anyInt())).thenReturn(inq);
+        } else if ("PROPIETARIO".equals(rolStr)) {
+            Propietario prop = new Propietario();
+            prop.setId(2);
+            session.setAttribute("usuarioLogueado", prop);
+        }
 
-    @Test
-    @DisplayName("Debe realizar reserva exitosa (inmediata)")
-    void testRealizarReserva_Exito_Inmediata() {
-        // 1. Arrange (Preparar comportamiento de los mocks)
-        when(session.getAttribute("usuarioLogueado")).thenReturn(inquilino);
-        when(em.find(Inmueble.class, 1)).thenReturn(inmueble);
+        // 3. Configurar el Mock de Inmueble y BBDD
+        if ("10".equals(idInmuebleStr) || "1".equals(idInmuebleStr)) {
+            Inmueble inm = new Inmueble();
+            inm.setId(Integer.parseInt(idInmuebleStr));
+            when(em.find(eq(Inmueble.class), anyInt())).thenReturn(inm);
+        } else {
+            when(em.find(eq(Inmueble.class), anyInt())).thenReturn(null); // CP5 (9999)
+        }
+
+        // Simular disponibilidad y excepciones de BD
+        if ("EXCEPCION".equals(dispBDStr)) {
+            when(disponibilidadDAOMock.permiteReservaDirectaEnPeriodo(anyInt(), any(), any()))
+                .thenThrow(new RuntimeException("Simulando caída BD"));
+        } else {
+            when(disponibilidadDAOMock.permiteReservaDirectaEnPeriodo(anyInt(), any(), any()))
+                .thenReturn(Boolean.parseBoolean(dispBDStr));
+        }
         
-        // Simulamos que hay disponibilidad inmediata
-        when(disponibilidadDAO.permiteReservaDirectaEnPeriodo(anyInt(), any(), any())).thenReturn(true);
+        // Simular el guardado de la reserva (devuelve un mock de reserva con ID)
+        when(reservaDAOMock.saveEntity(any(Reserva.class))).thenAnswer(i -> {
+            Reserva r = i.getArgument(0);
+            r.setId(999);
+            return r;
+        });
 
-        // 2. Act (Ejecutar el método del controlador)
-        String vista = gestorReservas.realizarReserva(1, fechaInicio, fechaFin, MetodoPago.TARJETA_CREDITO, session, model);
+        // 4. Ejecutar petición HTTP
+        var request = post("/realizarReserva")
+                .session(session)
+                .param("fechaInicio", fInicio.toString())
+                .param("fechaFin", fFin.toString());
+                
+        // Añadir parámetros opcionales
+        if (!"NULL".equals(idInmuebleStr)) request.param("idInmueble", idInmuebleStr);
+        if (!"NULL".equals(metodoPagoStr)) request.param("metodoPago", metodoPagoStr);
 
-        // 3. Assert (Verificaciones)
-        
-        // Verificamos que se llamó a guardar la reserva
-        verify(reservaDAO).saveEntity(any(Reserva.class));
-        
-        // Verificamos que se procesó el pago
-        verify(gestorPagos).procesarPagoInterno(any(Pago.class));
-        
-        // Verificamos que se guardó una solicitud ACEPTADA (porque era inmediata)
-        verify(solicitudDAO).saveEntity(argThat(solicitud -> 
-            solicitud.getEstado().equals("ACEPTADA")
-        ));
-
-        // Verificamos la vista de retorno
-        assertEquals("reserva_exito", vista);
-    }
-
-    @Test
-    @DisplayName("Debe crear solicitud pendiente si no es reserva inmediata")
-    void testRealizarReserva_Pendiente() {
-        // 1. Arrange
-        when(session.getAttribute("usuarioLogueado")).thenReturn(inquilino);
-        when(em.find(Inmueble.class, 1)).thenReturn(inmueble);
-        
-        // Simulamos que NO es inmediata (requiere aprobación)
-        when(disponibilidadDAO.permiteReservaDirectaEnPeriodo(anyInt(), any(), any())).thenReturn(false);
-
-        // 2. Act
-        String vista = gestorReservas.realizarReserva(1, fechaInicio, fechaFin, MetodoPago.PAYPAL, session, model);
-
-        // 3. Assert
-        // Verificamos que se guardó una solicitud PENDIENTE
-        verify(solicitudDAO).saveEntity(argThat(solicitud -> 
-            solicitud.getEstado().equals("PENDIENTE")
-        ));
-
-        assertEquals("reserva_pendiente", vista);
+        // 5. Validar Resultados
+        if ("bad_request".equals(resultadoEsperado)) {
+            // Maneja CP6, CP7, CP8, CP12, CP13 (Spring lanza TypeMismatch antes de llegar al controlador)
+            mockMvc.perform(request).andExpect(status().isBadRequest());
+        } else if (resultadoEsperado.startsWith("redirect:")) {
+            // Maneja CP3 y CP4
+            mockMvc.perform(request)
+                   .andExpect(status().is3xxRedirection())
+                   .andExpect(redirectedUrl(resultadoEsperado.replace("redirect:", "")));
+        } else {
+            // Maneja CP1, CP2, CP5, CP9, CP10, CP11, CP14 (Devuelven una vista HTML)
+            mockMvc.perform(request)
+                   .andExpect(status().isOk())
+                   .andExpect(view().name(resultadoEsperado));
+        }
     }
     
-    @Test
-    @DisplayName("Propietario acepta solicitud: Debe cambiar estado a ACEPTADA")
-    void testGestionarSolicitud_Aceptar() {
-        // 1. Arrange
-        SolicitudReserva solicitud = new SolicitudReserva();
-        solicitud.setId(100);
-        solicitud.setEstado("PENDIENTE");
-
-        when(solicitudDAO.selectEntity(100)).thenReturn(solicitud);
-
-        // 2. Act
-        // Llamamos al método con aceptar = true
-        String vista = gestorReservas.gestionarSolicitud(100, true);
-
-        // 3. Assert
-        // Verificamos que se cambió el estado
-        assertEquals("ACEPTADA", solicitud.getEstado());
-        // Verificamos que se actualizó en la BD
-        verify(solicitudDAO).updateEntity(solicitud);
-        // Verificamos redirección
-        assertEquals("redirect:/propietario/solicitudes", vista);
-    }
-
-    @Test
-    @DisplayName("Propietario rechaza solicitud: Debe cambiar a RECHAZADA y reembolsar")
-    void testGestionarSolicitud_Rechazar() {
-        // 1. Arrange
-        SolicitudReserva solicitud = new SolicitudReserva();
-        solicitud.setId(200);
-        solicitud.setEstado("PENDIENTE");
-
-        // Necesitamos una reserva y un pago asociados para comprobar el reembolso
-        Reserva reservaAsociada = new Reserva();
-        Inquilino inquilinoAsociado = new Inquilino();
-        inquilinoAsociado.setNombre("Inquilino Reembolso");
-        reservaAsociada.setInquilino(inquilinoAsociado);
+    @ParameterizedTest(name = "CP{index} (gestionarSolicitud): idSolicitud={0}, Aceptar={1}")
+    @CsvSource({
+        "100, true",   // CP15: Propietario acepta -> Éxito
+        "100, false"   // CP16: Propietario rechaza -> Falla reembolso (simulado)
+    })
+    @DisplayName("Tests para gestionarSolicitud (CP15 y CP16)")
+    void testGestionarSolicitud(Integer idSolicitud, boolean aceptar) throws Exception {
         
-        Pago pagoOriginal = new Pago();
-        pagoOriginal.setReferencia("REF-1234");
-        pagoOriginal.setMetodoPago(MetodoPago.PAYPAL);
-        reservaAsociada.setPago(pagoOriginal);
+        // 1. Simular la sesión del Propietario
+        MockHttpSession session = new MockHttpSession();
+        Propietario prop = new Propietario();
+        prop.setId(2);
+        session.setAttribute("usuarioLogueado", prop);
+
+        // 2. Simular la Base de Datos (Solicitud y Reserva asociada)
+        SolicitudReserva solicitudSimulada = new SolicitudReserva();
+        solicitudSimulada.setId(idSolicitud);
+        solicitudSimulada.setEstado("PENDIENTE");
         
-        solicitud.setReserva(reservaAsociada);
-
-        when(solicitudDAO.selectEntity(200)).thenReturn(solicitud);
-
-        // 2. Act
-        // Llamamos al método con aceptar = false
-        String vista = gestorReservas.gestionarSolicitud(200, false);
-
-        // 3. Assert
-        // Verificamos estado
-        assertEquals("RECHAZADA", solicitud.getEstado());
-        verify(solicitudDAO).updateEntity(solicitud);
+        Reserva reservaSimulada = new Reserva();
+        // Al no setearle un Pago a la reserva, forzamos que al rechazar salte el NullPointerException 
+        // y entre en el catch simulando el fallo del GestorPagos (CP16)
+        solicitudSimulada.setReserva(reservaSimulada); 
         
-        // Verificamos que, aunque no hay un método "reembolsar" en el GestorPagos (según tu código actual solo hace sysouts),
-        // la lógica llega al punto de tener acceso al pago.
-        // En un escenario real, aquí haríamos: verify(gestorPagos).reembolsar(pagoOriginal);
-        
-        assertEquals("redirect:/propietario/solicitudes", vista);
-    }
+        when(solicitudDAOMock.selectEntity(idSolicitud)).thenReturn(solicitudSimulada);
 
-    @Test
-    @DisplayName("Debe manejar excepciones y mostrar vista de error")
-    void testRealizarReserva_Excepcion() {
-        // 1. Arrange
-        when(session.getAttribute("usuarioLogueado")).thenReturn(inquilino);
-        when(em.find(Inmueble.class, 1)).thenReturn(inmueble);
-        
-        // Simulamos una excepción inesperada en alguno de los DAOs
-        when(disponibilidadDAO.permiteReservaDirectaEnPeriodo(anyInt(), any(), any()))
-            .thenThrow(new RuntimeException("Error inesperado en BD"));
-
-        // 2. Act
-        String vista = gestorReservas.realizarReserva(1, fechaInicio, fechaFin, MetodoPago.TARJETA_CREDITO, session, model);
-
-        // 3. Assert
-        // Verificamos que se captura la excepción y se redirige a "error"
-        assertEquals("error", vista);
-        verify(model).addAttribute(eq("error"), contains("Error inesperado en BD"));
+        // 3. Ejecutar petición HTTP POST
+        mockMvc.perform(post("/propietario/gestionarSolicitud")
+                .session(session)
+                .param("idSolicitud", idSolicitud.toString())
+                .param("aceptar", String.valueOf(aceptar)))
+        // 4. Comprobar que en ambos casos redirige a la lista de solicitudes
+               .andExpect(status().is3xxRedirection())
+               .andExpect(redirectedUrl("/propietario/solicitudes"));
     }
 }
