@@ -55,7 +55,6 @@
         <sonar.projectKey>HogarLink</sonar.projectKey>
         <sonar.organization>grupo06</sonar.organization>
         <sonar.host.url>http://172.20.48.132:9000</sonar.host.url>
-        <sonar.login>sqp_b7dd5425634add70e2b8395828beaa9ce38733e5</sonar.login>
     </properties>
 
     <dependencies>

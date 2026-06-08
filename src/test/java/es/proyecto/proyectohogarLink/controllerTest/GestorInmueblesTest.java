@@ -1,7 +1,6 @@
 package es.proyecto.proyectohogarLink.controllerTest;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,8 +18,8 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import es.proyecto.proyectohogarLink.controller.GestorInmuebles;
-import es.proyecto.proyectohogarLink.dao.InmuebleDAO;
 import es.proyecto.proyectohogarLink.dao.DisponibilidadDAO;
+import es.proyecto.proyectohogarLink.dao.InmuebleDAO;
 import es.proyecto.proyectohogarLink.entity.Inmueble;
 import es.proyecto.proyectohogarLink.entity.Propietario;
 import es.proyecto.proyectohogarLink.entity.Usuario;
@@ -96,7 +95,7 @@ public class GestorInmueblesTest {
         when(session.getAttribute("usuarioLogueado")).thenReturn(propietario);
         
         // IMPORTANTE: Simular que la BBDD encuentra al propietario cuando hacemos em.find()
-        when(em.find(eq(Propietario.class), eq(1))).thenReturn(propietario);
+        when(em.find(Propietario.class, 1)).thenReturn(propietario);
         
         // IMPORTANTE: Simular que el archivo no está vacío (o sí, para este test simple)
         // Si ponemos true, no entra en el bloque de leer bytes, simplificando el test
