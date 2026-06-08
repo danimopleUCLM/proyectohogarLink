@@ -1,7 +1,7 @@
 package es.proyecto.proyectohogarLink.controller;
 
-import es.proyecto.proyectohogarLink.DAO.DisponibilidadDAO;
-import es.proyecto.proyectohogarLink.DAO.InmuebleDAO;
+import es.proyecto.proyectohogarLink.dao.DisponibilidadDAO;
+import es.proyecto.proyectohogarLink.dao.InmuebleDAO;
 import es.proyecto.proyectohogarLink.entity.Disponibilidad;
 import es.proyecto.proyectohogarLink.entity.Inmueble;
 import es.proyecto.proyectohogarLink.entity.Propietario;
@@ -104,12 +104,12 @@ public class GestorInmuebles {
             Inmueble inmueble = inmuebleDAO.selectEntity(idInmueble);
             disponibilidad.setInmueble(inmueble);
             if (disponibilidad.getFechaInicio().isAfter(disponibilidad.getFechaFin())) {
-                return REDIRECT_MIS_INMUEBLES;
+            	return "redirect:/propietario/mis-inmuebles?error=fechas";
             }
             disponibilidadDAO.saveEntity(disponibilidad);
             return REDIRECT_MIS_INMUEBLES;
         } catch (Exception e) {
-            return REDIRECT_MIS_INMUEBLES;
+        	return "redirect:/propietario/mis-inmuebles?error=servidor";
         }
     }
 }
