@@ -1,4 +1,4 @@
-package es.proyecto.proyectohogarLink.DAO;
+package es.proyecto.proyectohogarLink.dao;
 
 import es.proyecto.proyectohogarLink.entity.Disponibilidad;
 import jakarta.persistence.EntityManager;

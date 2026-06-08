@@ -9,7 +9,7 @@ import org.mockito.MockitoAnnotations;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.NoResultException;
-import es.proyecto.proyectohogarLink.DAO.PagoDAO;
+import es.proyecto.proyectohogarLink.dao.PagoDAO;
 import es.proyecto.proyectohogarLink.entity.Pago;
 
 public class PagoDAOTest {

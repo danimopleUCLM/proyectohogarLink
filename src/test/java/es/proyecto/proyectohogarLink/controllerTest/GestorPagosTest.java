@@ -11,7 +11,7 @@ import org.mockito.MockitoAnnotations;
 import java.lang.reflect.Field;
 
 import es.proyecto.proyectohogarLink.controller.GestorPagos;
-import es.proyecto.proyectohogarLink.DAO.PagoDAO;
+import es.proyecto.proyectohogarLink.dao.PagoDAO;
 import es.proyecto.proyectohogarLink.entity.Pago;
 
 public class GestorPagosTest {

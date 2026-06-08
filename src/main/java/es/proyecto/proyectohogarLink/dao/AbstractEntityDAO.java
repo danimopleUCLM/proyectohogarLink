@@ -1,4 +1,4 @@
-package es.proyecto.proyectohogarLink.DAO;
+package es.proyecto.proyectohogarLink.dao;
 
 import jakarta.persistence.EntityManager;
 
@@ -11,7 +11,7 @@ public abstract class AbstractEntityDAO<T> {
     private Class<T> entityClass;
 
     // Constructor
-    public AbstractEntityDAO(EntityManager em, Class<T> entityClass) {
+    protected AbstractEntityDAO(EntityManager em, Class<T> entityClass) {
         this.em = em;
         this.entityClass = entityClass;
     }

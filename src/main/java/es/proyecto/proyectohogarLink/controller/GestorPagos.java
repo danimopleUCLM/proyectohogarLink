@@ -1,6 +1,6 @@
 package es.proyecto.proyectohogarLink.controller;
 
-import es.proyecto.proyectohogarLink.DAO.PagoDAO;
+import es.proyecto.proyectohogarLink.dao.PagoDAO;
 import es.proyecto.proyectohogarLink.entity.Pago;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;

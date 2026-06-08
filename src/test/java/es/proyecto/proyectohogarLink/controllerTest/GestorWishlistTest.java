@@ -16,8 +16,8 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import es.proyecto.proyectohogarLink.controller.GestorWishlist;
-import es.proyecto.proyectohogarLink.DAO.ListaDeseosDAO;
-import es.proyecto.proyectohogarLink.DAO.InmuebleDAO;
+import es.proyecto.proyectohogarLink.dao.ListaDeseosDAO;
+import es.proyecto.proyectohogarLink.dao.InmuebleDAO;
 import es.proyecto.proyectohogarLink.entity.*;
 
 public class GestorWishlistTest {

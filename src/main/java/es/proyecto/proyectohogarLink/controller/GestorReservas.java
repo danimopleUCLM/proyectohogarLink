@@ -1,8 +1,8 @@
 package es.proyecto.proyectohogarLink.controller;
+
 import org.springframework.web.servlet.mvc.support.RedirectAttributes; 
 import es.proyecto.proyectohogarLink.entity.Propietario;
-
-import es.proyecto.proyectohogarLink.DAO.*;
+import es.proyecto.proyectohogarLink.dao.*;
 import es.proyecto.proyectohogarLink.entity.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -28,6 +28,9 @@ public class GestorReservas {
     private static final Logger logger = LoggerFactory.getLogger(GestorReservas.class);
     private static final String USUARIO_LOGUEADO = "usuarioLogueado";
     private static final String REDIRECT_LOGIN = "redirect:/login";
+    
+    // --- NUEVA CONSTANTE AÑADIDA PARA SOLUCIONAR EL CODE SMELL ---
+    private static final String ERROR = "error";
 
     @PersistenceContext
     private EntityManager em;
@@ -59,7 +62,7 @@ public class GestorReservas {
             @RequestParam MetodoPago metodoPago, 
             HttpSession session,
             Model model,
-            RedirectAttributes redirectAttributes) { // <--- AÑADIDO: Para enviar mensajes en redirects) {
+            RedirectAttributes redirectAttributes) { 
 
         initDaos();
         Usuario usuarioSession = (Usuario) session.getAttribute(USUARIO_LOGUEADO);
@@ -69,10 +72,10 @@ public class GestorReservas {
             return REDIRECT_LOGIN;
         }
         
-     // --- 2. NUEVA LÓGICA: SI ES PROPIETARIO -> ERROR EN LA MISMA PÁGINA ---
+        // --- 2. NUEVA LÓGICA: SI ES PROPIETARIO -> ERROR EN LA MISMA PÁGINA ---
         if (usuarioSession instanceof Propietario) {
-            // Guardamos el error para que se vea tras la redirección
-            redirectAttributes.addFlashAttribute("error", "Los propietarios no pueden realizar reservas. Debes entrar como Inquilino.");
+            // Guardamos el error para que se vea tras la redirección (Usando la constante)
+            redirectAttributes.addFlashAttribute(ERROR, "Los propietarios no pueden realizar reservas. Debes entrar como Inquilino.");
             // Redirigimos de vuelta al detalle del inmueble
             return "redirect:/detalle/" + idInmueble;
         }
@@ -83,8 +86,9 @@ public class GestorReservas {
             Inmueble inmueble = em.find(Inmueble.class, idInmueble);
             
             if (inmueble == null) {
-                model.addAttribute("error", "El inmueble seleccionado no existe.");
-                return "error"; 
+                // Usando la constante en lugar del literal
+                model.addAttribute(ERROR, "El inmueble seleccionado no existe.");
+                return ERROR; 
             }
             
             // 2. Lógica de disponibilidad
@@ -97,23 +101,19 @@ public class GestorReservas {
             reserva.setInmueble(inmueble);
 
             // --- CORRECCIÓN CRÍTICA AQUÍ ---
-            // Capturamos el resultado de saveEntity. 
-            // Esto actualiza la variable 'reserva' con el ID generado por la base de datos.
             reserva = reservaDAO.saveEntity(reserva);
             
-            // Forzamos la sincronización con la BBDD para asegurar que la Reserva existe antes de asociarla al Pago
+            // Forzamos la sincronización con la BBDD
             em.flush(); 
 
             // 3. Crear el Pago
             Pago pago = new Pago();
             pago.setMetodoPago(metodoPago);
-            pago.setReserva(reserva); // Ahora 'reserva' tiene ID válido
+            pago.setReserva(reserva);
             
-            // Generamos referencia obligatoria (tu entidad tiene nullable=false)
             String referenciaGenerada = UUID.randomUUID().toString();
             pago.setReferencia(referenciaGenerada);
 
-            // Guardamos el pago
             gestorPagos.procesarPagoInterno(pago);
 
             // 4. Gestionar Solicitud
@@ -139,9 +139,9 @@ public class GestorReservas {
 
         } catch (Exception e) {
             logger.error("Error realizando la reserva", e);
-            // IMPORTANTE: Si salta error, mostramos el mensaje en pantalla
-            model.addAttribute("error", "Error procesando la reserva: " + e.getMessage());
-            return "error"; // Asegúrate de tener una vista error.html o redirigir a inicio
+            // Usando la constante en lugar del literal
+            model.addAttribute(ERROR, "Error procesando la reserva: " + e.getMessage());
+            return ERROR; 
         }
     }
 

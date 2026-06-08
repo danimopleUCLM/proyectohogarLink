@@ -10,7 +10,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import java.util.ArrayList;
 import java.util.List;
-import es.proyecto.proyectohogarLink.DAO.SolicitudReservaDAO;
+import es.proyecto.proyectohogarLink.dao.SolicitudReservaDAO;
 import es.proyecto.proyectohogarLink.entity.SolicitudReserva;
 
 public class SolicitudReservaDAOTest {

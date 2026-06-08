@@ -9,7 +9,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import java.util.ArrayList;
 import java.util.List;
-import es.proyecto.proyectohogarLink.DAO.ListaDeseosDAO;
+import es.proyecto.proyectohogarLink.dao.ListaDeseosDAO;
 import es.proyecto.proyectohogarLink.entity.ListaDeseos;
 import es.proyecto.proyectohogarLink.entity.ListaDeseosId;
 

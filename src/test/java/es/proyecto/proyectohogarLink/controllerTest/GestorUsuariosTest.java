@@ -13,7 +13,7 @@ import jakarta.servlet.http.HttpSession;
 import java.lang.reflect.Field;
 
 import es.proyecto.proyectohogarLink.controller.GestorUsuarios;
-import es.proyecto.proyectohogarLink.DAO.UsuarioDAO;
+import es.proyecto.proyectohogarLink.dao.UsuarioDAO;
 import es.proyecto.proyectohogarLink.entity.Usuario;
 import es.proyecto.proyectohogarLink.entity.Inquilino;
 
