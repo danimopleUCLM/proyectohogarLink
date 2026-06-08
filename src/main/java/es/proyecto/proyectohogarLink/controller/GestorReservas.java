@@ -79,6 +79,16 @@ public class GestorReservas {
             // Redirigimos de vuelta al detalle del inmueble
             return "redirect:/detalle/" + idInmueble;
         }
+        
+     // Añadir en realizarReserva() ANTES del try, tras la comprobación del Propietario:
+        if (fechaInicio.isBefore(LocalDate.now())) {
+            model.addAttribute("error", "La fecha de inicio no puede ser pasada.");
+            return "error";
+        }
+        if (!fechaFin.isAfter(fechaInicio)) {
+            model.addAttribute("error", "La fecha de fin debe ser posterior a la de inicio.");
+            return "error";
+        }
 
         try {
             // 1. Recargamos las entidades desde la BBDD para evitar errores de objetos desconectados
