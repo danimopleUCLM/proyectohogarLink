@@ -1,6 +1,6 @@
 package es.proyecto.proyectohogarLink.controller;
 
-import es.proyecto.proyectohogarLink.DAO.InmuebleDAO;
+import es.proyecto.proyectohogarLink.dao.InmuebleDAO;
 import es.proyecto.proyectohogarLink.entity.Inmueble;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;

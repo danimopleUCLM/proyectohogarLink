@@ -20,9 +20,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.test.util.ReflectionTestUtils;
 import es.proyecto.proyectohogarLink.controller.GestorReservas;
 import es.proyecto.proyectohogarLink.controller.GestorPagos;
-import es.proyecto.proyectohogarLink.DAO.ReservaDAO;
-import es.proyecto.proyectohogarLink.DAO.SolicitudReservaDAO;
-import es.proyecto.proyectohogarLink.DAO.DisponibilidadDAO;
+import es.proyecto.proyectohogarLink.dao.ReservaDAO;
+import es.proyecto.proyectohogarLink.dao.SolicitudReservaDAO;
+import es.proyecto.proyectohogarLink.dao.DisponibilidadDAO;
 import es.proyecto.proyectohogarLink.entity.*;
 
 class GestorReservasTest {

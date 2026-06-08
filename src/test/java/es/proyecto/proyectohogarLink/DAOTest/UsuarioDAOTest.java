@@ -9,7 +9,7 @@ import org.mockito.MockitoAnnotations;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.NoResultException;
-import es.proyecto.proyectohogarLink.DAO.UsuarioDAO;
+import es.proyecto.proyectohogarLink.dao.UsuarioDAO;
 import es.proyecto.proyectohogarLink.entity.Usuario;
 
 public class UsuarioDAOTest {

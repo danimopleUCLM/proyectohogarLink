@@ -1,6 +1,6 @@
 package es.proyecto.proyectohogarLink.controller;
 
-import es.proyecto.proyectohogarLink.DAO.UsuarioDAO;
+import es.proyecto.proyectohogarLink.dao.UsuarioDAO;
 import es.proyecto.proyectohogarLink.entity.Inquilino;
 import es.proyecto.proyectohogarLink.entity.Propietario;
 import es.proyecto.proyectohogarLink.entity.Usuario;

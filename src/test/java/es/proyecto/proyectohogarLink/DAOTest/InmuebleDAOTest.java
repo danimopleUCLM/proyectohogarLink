@@ -13,7 +13,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import es.proyecto.proyectohogarLink.DAO.InmuebleDAO;
+import es.proyecto.proyectohogarLink.dao.InmuebleDAO;
 import es.proyecto.proyectohogarLink.entity.Inmueble;
 
 public class InmuebleDAOTest {

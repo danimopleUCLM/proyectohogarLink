@@ -19,8 +19,8 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import es.proyecto.proyectohogarLink.controller.GestorInmuebles;
-import es.proyecto.proyectohogarLink.DAO.InmuebleDAO;
-import es.proyecto.proyectohogarLink.DAO.DisponibilidadDAO;
+import es.proyecto.proyectohogarLink.dao.InmuebleDAO;
+import es.proyecto.proyectohogarLink.dao.DisponibilidadDAO;
 import es.proyecto.proyectohogarLink.entity.Inmueble;
 import es.proyecto.proyectohogarLink.entity.Propietario;
 import es.proyecto.proyectohogarLink.entity.Usuario;

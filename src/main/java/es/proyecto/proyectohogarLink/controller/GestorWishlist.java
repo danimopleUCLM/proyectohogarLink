@@ -1,7 +1,7 @@
 package es.proyecto.proyectohogarLink.controller;
 
-import es.proyecto.proyectohogarLink.DAO.InmuebleDAO;
-import es.proyecto.proyectohogarLink.DAO.ListaDeseosDAO;
+import es.proyecto.proyectohogarLink.dao.InmuebleDAO;
+import es.proyecto.proyectohogarLink.dao.ListaDeseosDAO;
 import es.proyecto.proyectohogarLink.entity.Inmueble;
 import es.proyecto.proyectohogarLink.entity.ListaDeseos;
 import es.proyecto.proyectohogarLink.entity.Usuario;

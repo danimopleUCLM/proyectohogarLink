@@ -15,7 +15,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 
 import es.proyecto.proyectohogarLink.controller.GestorBusquedas;
-import es.proyecto.proyectohogarLink.DAO.InmuebleDAO;
+import es.proyecto.proyectohogarLink.dao.InmuebleDAO;
 
 public class GestorBusquedasTest {
 
