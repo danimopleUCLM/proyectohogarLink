@@ -3,7 +3,7 @@ package es.proyecto.proyectohogarLink.controllerTest;
 import es.proyecto.proyectohogarLink.controller.GestorReservas;
 import es.proyecto.proyectohogarLink.controller.GestorPagos;
 import org.springframework.boot.test.autoconfigure.OverrideAutoConfiguration;
-import org.springframework.test.util.AopTestUtils; // <-- LA HERRAMIENTA MAGICA
+import org.springframework.test.util.AopTestUtils;
 
 import es.proyecto.proyectohogarLink.dao.*;
 import es.proyecto.proyectohogarLink.entity.*;
@@ -29,7 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(GestorReservas.class)
 @OverrideAutoConfiguration(enabled = true)
-public class GestorReservasTest {
+class GestorReservasTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -53,10 +53,8 @@ public class GestorReservasTest {
         solicitudDAOMock = mock(SolicitudReservaDAO.class);
         disponibilidadDAOMock = mock(DisponibilidadDAO.class);
 
-        // --- SOLUCIÓN AL PROXY: Obtenemos la clase real saltándonos el @Transactional ---
         GestorReservas controladorReal = AopTestUtils.getTargetObject(gestorReservasController);
 
-        // Inyectamos los mocks en la clase REAL
         ReflectionTestUtils.setField(controladorReal, "reservaDAO", reservaDAOMock);
         ReflectionTestUtils.setField(controladorReal, "solicitudDAO", solicitudDAOMock);
         ReflectionTestUtils.setField(controladorReal, "disponibilidadDAO", disponibilidadDAOMock);
@@ -65,20 +63,20 @@ public class GestorReservasTest {
 
     @ParameterizedTest(name = "CP{index}: Rol={0}, idInm={1}, F.Inicio={2}, F.Fin={3}, Pago={4}, DispBD={5} -> {6}")
     @CsvSource({
-        "INQUILINO, 10, 2026-10-15, 2026-10-22, TARJETA_CREDITO, TRUE, reserva_exito",      // CP1
-        "INQUILINO, 1, hoy, hoy+1, PAYPAL, FALSE, reserva_pendiente",                         // CP2
-        "PROPIETARIO, 10, 2026-10-15, 2026-10-22, TARJETA_DEBITO, TRUE, redirect:/detalle/10", // CP3
-        "NULL, 10, 2026-10-15, 2026-10-22, TARJETA_CREDITO, TRUE, redirect:/login",           // CP4
-        "INQUILINO, 9999, 2026-10-15, 2026-10-22, TARJETA_CREDITO, TRUE, error",              // CP5
-        "INQUILINO, -1, 2026-10-15, 2026-10-22, TARJETA_CREDITO, TRUE, error",                // CP6 
-        "INQUILINO, NULL, 2026-10-15, 2026-10-22, TARJETA_CREDITO, TRUE, bad_request",        // CP7
-        "INQUILINO, letras, 2026-10-15, 2026-10-22, TARJETA_CREDITO, TRUE, bad_request",      // CP8
-        "INQUILINO, 10, 2025-01-01, 2026-10-22, TARJETA_CREDITO, TRUE, error",                // CP9 
-        "INQUILINO, 10, 2026-10-15, 2026-10-10, TARJETA_CREDITO, TRUE, error",                // CP10 
-        "INQUILINO, 10, 2026-10-15, 2026-10-15, TARJETA_CREDITO, TRUE, error",                // CP11 
-        "INQUILINO, 10, 2026-10-15, 2026-10-22, NULL, TRUE, bad_request",                     // CP12
-        "INQUILINO, 10, 2026-10-15, 2026-10-22, BITCOIN, TRUE, bad_request",                  // CP13
-        "INQUILINO, 10, 2026-10-15, 2026-10-22, TARJETA_CREDITO, EXCEPCION, error"            // CP14
+        "INQUILINO, 10, 2026-10-15, 2026-10-22, TARJETA_CREDITO, TRUE, reserva_exito",      
+        "INQUILINO, 1, hoy, hoy+1, PAYPAL, FALSE, reserva_pendiente",                         
+        "PROPIETARIO, 10, 2026-10-15, 2026-10-22, TARJETA_DEBITO, TRUE, redirect:/detalle/10", 
+        "NULL, 10, 2026-10-15, 2026-10-22, TARJETA_CREDITO, TRUE, redirect:/login",           
+        "INQUILINO, 9999, 2026-10-15, 2026-10-22, TARJETA_CREDITO, TRUE, error",              
+        "INQUILINO, -1, 2026-10-15, 2026-10-22, TARJETA_CREDITO, TRUE, error",                
+        "INQUILINO, NULL, 2026-10-15, 2026-10-22, TARJETA_CREDITO, TRUE, bad_request",        
+        "INQUILINO, letras, 2026-10-15, 2026-10-22, TARJETA_CREDITO, TRUE, bad_request",      
+        "INQUILINO, 10, 2025-01-01, 2026-10-22, TARJETA_CREDITO, TRUE, error",                
+        "INQUILINO, 10, 2026-10-15, 2026-10-10, TARJETA_CREDITO, TRUE, error",                
+        "INQUILINO, 10, 2026-10-15, 2026-10-15, TARJETA_CREDITO, TRUE, error",                
+        "INQUILINO, 10, 2026-10-15, 2026-10-22, NULL, TRUE, bad_request",                     
+        "INQUILINO, 10, 2026-10-15, 2026-10-22, BITCOIN, TRUE, bad_request",                  
+        "INQUILINO, 10, 2026-10-15, 2026-10-22, TARJETA_CREDITO, EXCEPCION, error"            
     })
     @DisplayName("Tests parametrizados para realizarReserva")
     void testRealizarReserva(String rolStr, String idInmuebleStr, String fInicioStr, String fFinStr, 
@@ -95,7 +93,8 @@ public class GestorReservasTest {
             Inquilino inq = new Inquilino();
             inq.setId(1);
             session.setAttribute("usuarioLogueado", inq);
-            when(em.find(eq(Inquilino.class), eq(1))).thenReturn(inq); 
+            //  Limpio: sin eq() porque pasamos valores directos
+            when(em.find(Inquilino.class, 1)).thenReturn(inq); 
         } else if ("PROPIETARIO".equals(rolStr)) {
             Propietario prop = new Propietario();
             prop.setId(2);
@@ -106,9 +105,10 @@ public class GestorReservasTest {
             Inmueble inm = new Inmueble();
             int id = Integer.parseInt(idInmuebleStr);
             inm.setId(id);
-            // ✅ Usa eq() con el ID concreto en vez de any()
-            when(em.find(eq(Inmueble.class), eq(id))).thenReturn(inm);
+            //  Limpio: sin eq() porque pasamos valores directos
+            when(em.find(Inmueble.class, id)).thenReturn(inm);
         } else {
+            //  Mantenemos el eq() aquí porque está mezclado con un any()
             when(em.find(eq(Inmueble.class), any())).thenReturn(null); 
         }
 

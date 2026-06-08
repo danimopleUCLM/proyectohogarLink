@@ -82,12 +82,12 @@ public class GestorReservas {
         
      // Añadir en realizarReserva() ANTES del try, tras la comprobación del Propietario:
         if (fechaInicio.isBefore(LocalDate.now())) {
-            model.addAttribute("error", "La fecha de inicio no puede ser pasada.");
-            return "error";
+            model.addAttribute(ERROR, "La fecha de inicio no puede ser pasada.");
+            return ERROR;
         }
         if (!fechaFin.isAfter(fechaInicio)) {
             model.addAttribute("error", "La fecha de fin debe ser posterior a la de inicio.");
-            return "error";
+            return ERROR;
         }
 
         try {
