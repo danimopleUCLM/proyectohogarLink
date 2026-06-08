@@ -86,7 +86,7 @@ public class GestorReservas {
             return ERROR;
         }
         if (!fechaFin.isAfter(fechaInicio)) {
-            model.addAttribute("error", "La fecha de fin debe ser posterior a la de inicio.");
+            model.addAttribute(ERROR, "La fecha de fin debe ser posterior a la de inicio.");
             return ERROR;
         }
 
