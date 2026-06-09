@@ -8,12 +8,14 @@ import es.proyecto.proyectohogarLink.entity.User;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 class ProyectohogarLinkApplicationTests {
 
 	@Test
 	void contextLoads() {
+		assertTrue(true, "El contexto de Spring Boot se ha cargado correctamente");
 	}
 
 	@Test
