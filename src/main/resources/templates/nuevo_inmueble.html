@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Publicar Inmueble - HogarLink</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light d-flex flex-column min-vh-100">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/inicio">🏠 HogarLink</a>
+            <div class="d-flex align-items-center">
+                <span class="text-white me-3 small">Hola, <b th:text="${session.usuarioLogueado.nombre}">Propietario</b></span>
+                <a href="/propietario/mis-inmuebles" class="btn btn-outline-light btn-sm me-2">Volver al Panel</a>
+                <a href="/logout" class="btn btn-danger btn-sm">Cerrar Sesión</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container flex-grow-1">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                
+                <div class="card shadow-lg border-0 rounded-3">
+                    <div class="card-header bg-primary text-white text-center py-3">
+                        <h4 class="mb-0">✨ Publicar Nuevo Alojamiento</h4>
+                    </div>
+                    <div class="card-body p-4">
+                        
+                        <form th:action="@{/propietario/nuevo-inmueble}" method="post" th:object="${inmueble}">
+                            
+                            <div class="mb-3">
+                                <label for="direccion" class="form-label fw-bold">Dirección Completa</label>
+                                <input type="text" class="form-control form-control-lg" id="direccion" name="direccion" 
+                                       placeholder="Ej: Calle Mayor 12, 3ºA, Madrid" required>
+                                <div class="form-text">Indica la calle, número y ciudad.</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="precioNoche" class="form-label fw-bold">Precio por noche (€)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">€</span>
+                                    <input type="number" class="form-control form-control-lg" id="precioNoche" name="precioNoche" 
+                                           step="0.01" min="1" placeholder="0.00" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="politicaCancelacion" class="form-label fw-bold">Política de Cancelación</label>
+                                <select class="form-select form-select-lg" id="politicaCancelacion" name="politicaCancelacion" required>
+                                    <option value="" selected disabled>Selecciona una opción...</option>
+                                    <option value="REEMBOLSABLE">🟢 Reembolsable (Flexible)</option>
+                                    <option value="REEMBOLSABLE_50_PER">🟡 Reembolsable 50% (Moderada)</option>
+                                    <option value="NO_REEMBOLSABLE">🔴 No Reembolsable (Estricta)</option>
+                                </select>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg fw-bold">Guardar y Publicar</button>
+                                <a href="/propietario/mis-inmuebles" class="btn btn-outline-secondary">Cancelar</a>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white pt-4 pb-2 mt-5">
+        <div class="container text-center">
+            <p class="mb-0">HogarLink © 2025 - Panel de Gestión</p>
+        </div>
+    </footer>
+
+</body>
+</html>

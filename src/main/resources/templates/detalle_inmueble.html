@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Detalle Alojamiento</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+<body class="bg-light d-flex flex-column min-vh-100">
+    <div class="container py-5 flex-grow-1">
+        <a href="/buscar" class="text-decoration-none mb-3 d-block">&larr; Volver al buscador</a>
+        
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show shadow-sm mb-4" role="alert">
+            <strong>⚠️ Atención:</strong> <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div class="row">
+            <div class="col-md-7">
+                
+                <img th:if="${inmueble.imagenBase64 != null}"
+                     th:src="'data:image/jpeg;base64,' + ${inmueble.imagenBase64}"
+                     class="img-fluid rounded shadow mb-4" alt="Foto Detalle" style="width:100%; height: 400px; object-fit: cover;">
+                     
+                <img th:unless="${inmueble.imagenBase64 != null}"
+                     th:src="'https://picsum.photos/800/400?random=' + ${inmueble.id}" 
+                     class="img-fluid rounded shadow mb-4" alt="Foto Detalle" style="width:100%; height: 400px; object-fit: cover;">
+
+                <h1 th:text="${inmueble.direccion}"></h1>
+                <p class="lead mb-1">Anfitrión: <b th:text="${inmueble.propietario.nombre}"></b></p>
+                
+                <p class="text-secondary fs-5 mb-4">
+                    <i class="bi bi-people-fill"></i> Capacidad máxima: <strong th:text="${inmueble.capacidad}"></strong> viajero(s)
+                </p>
+
+                <hr>
+                <h4>Fechas disponibles:</h4>
+                <div class="list-group">
+                    <div th:each="disp : ${inmueble.disponibilidades}" class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            📅 <span th:text="${disp.fechaInicio}"></span> al <span th:text="${disp.fechaFin}"></span>
+                            <br><small class="text-muted">Precio oferta: <span th:text="${disp.precio}"></span>€</small>
+                        </div>
+                        <span th:if="${disp.directa}" class="badge bg-success">⚡ Inmediata</span>
+                        <span th:unless="${disp.directa}" class="badge bg-warning text-dark">⌛ Solicitud</span>
+                    </div>
+                    <div th:if="${#lists.isEmpty(inmueble.disponibilidades)}" class="alert alert-secondary">No hay fechas publicadas.</div>
+                </div>
+            </div>
+
+            <div class="col-md-5">
+                <div class="card shadow border-0 p-4 sticky-top" style="top: 20px;">
+                    <h3 class="mb-4 text-center"><span th:text="${inmueble.precioNoche}"></span>€ <small class="fs-6 text-muted">/ noche (base)</small></h3>
+                    
+                    <form action="/realizarReserva" method="post">
+                        <input type="hidden" name="idInmueble" th:value="${inmueble.id}">
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Llegada</label>
+                            <input type="date" name="fechaInicio" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Salida</label>
+                            <input type="date" name="fechaFin" class="form-control" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Pago</label>
+                            <select name="metodoPago" class="form-select">
+                                <option value="TARJETA_CREDITO">Tarjeta Crédito</option>
+                                <option value="TARJETA_DEBITO">Tarjeta Débito</option>
+                                <option value="PAYPAL">PayPal</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-danger w-100 py-2 fw-bold">Reservar</button>
+                    </form>
+                    <p class="text-center mt-3 small text-muted">No se hará el cargo hasta confirmar disponibilidad.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+	<footer class="bg-dark text-white pt-5 pb-4 mt-auto">
+	    <div class="container text-center text-md-start">
+	        <div class="row text-center text-md-start">
+	            <div class="col-md-3 col-lg-3 col-xl-3 mx-auto mt-3">
+	                <h5 class="text-uppercase mb-4 fw-bold text-primary">🏠 HogarLink</h5>
+	                <p>La plataforma líder en alquiler de viviendas entre particulares. Sin comisiones abusivas, trato directo y seguro.</p>
+	            </div>
+	            <div class="col-md-2 col-lg-2 col-xl-2 mx-auto mt-3">
+	                <h5 class="text-uppercase mb-4 fw-bold">Productos</h5>
+	                <p><a href="/buscar" class="text-white" style="text-decoration: none;">Buscar Casa</a></p>
+	                <p><a href="/registroPropietario" class="text-white" style="text-decoration: none;">Publicar Piso</a></p>
+	            </div>
+	            <div class="col-md-3 col-lg-2 col-xl-2 mx-auto mt-3">
+	                <h5 class="text-uppercase mb-4 fw-bold">Enlaces Útiles</h5>
+	                <p><a href="/login" class="text-white" style="text-decoration: none;">Tu Cuenta</a></p>
+	                <p><a href="#" class="text-white" style="text-decoration: none;">Ayuda</a></p>
+	            </div>
+	            <div class="col-md-4 col-lg-3 col-xl-3 mx-auto mt-3">
+	                <h5 class="text-uppercase mb-4 fw-bold">Contacto</h5>
+	                <p>📍 C/ Talavera, s/n, Toledo</p>
+	                <p>✉️ info@hogarlink.es</p>
+	            </div>
+	        </div>
+	        <hr class="mb-4">
+	        <div class="row align-items-center">
+	            <div class="col-md-7 col-lg-8">
+	                <p>Copyright © 2025 Todos los derechos reservados por:
+	                    <a href="#" style="text-decoration: none;"><strong class="text-primary">Tu Nombre/Grupo</strong></a>
+	                </p>
+	            </div>
+	        </div>
+	    </div>
+	</footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
