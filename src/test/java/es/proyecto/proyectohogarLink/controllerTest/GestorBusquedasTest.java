@@ -37,7 +37,7 @@ public class GestorBusquedasTest {
         daoField.set(gestorBusquedas, inmuebleDAO);
     }
 
-  @Test
+    @Test
     public void testBuscarInmuebles() {
         // 1. Datos simulados
         String destino = "Madrid";
@@ -56,7 +56,7 @@ public class GestorBusquedasTest {
         verify(model).addAttribute(eq("listaInmuebles"), any());
         
         // Si necesitas verificar el destino o viajeros también, puedes añadirlos así:
-        verify(model).addAttribute(eq("destinoBuscado"), eq(destino));
-        verify(model).addAttribute(eq("huespedes"), eq(viajeros));
+        verify(model).addAttribute("destinoBuscado", destino);
+        verify(model).addAttribute("huespedes", viajeros);
     }
 }

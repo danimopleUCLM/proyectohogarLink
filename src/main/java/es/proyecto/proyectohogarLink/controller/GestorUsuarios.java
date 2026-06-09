@@ -17,7 +17,8 @@ public class GestorUsuarios {
     private static final String REGISTRO_INQUILINO = "registro_inquilino";
     private static final String REGISTRO_PROPIETARIO = "registro_propietario";
     private static final String REDIRECT_LOGIN = "redirect:/login";
-
+    private static final String ERROR = "error";
+    
     @PersistenceContext
     private EntityManager em;
     
@@ -45,7 +46,7 @@ public class GestorUsuarios {
             session.setAttribute("usuarioLogueado", usuario);
             return "redirect:/inicio";
         } else {
-            model.addAttribute("error", "Usuario o contraseña incorrectos");
+            model.addAttribute(ERROR, "Usuario o contraseña incorrectos");
             return "login";
         }
     }
@@ -69,13 +70,13 @@ public class GestorUsuarios {
         initDao();
         try {
             if (usuarioDAO.existeLogin(inquilino.getLogin())) {
-                model.addAttribute("error", "El usuario ya existe");
+                model.addAttribute(ERROR, "El usuario ya existe");
                 return REGISTRO_INQUILINO;
             }
             usuarioDAO.saveEntity(inquilino);
             return REDIRECT_LOGIN;
         } catch (Exception e) {
-            model.addAttribute("error", "Error en registro: " + e.getMessage());
+            model.addAttribute(ERROR, "Error en registro: " + e.getMessage());
             return REGISTRO_INQUILINO;
         }
     }
@@ -93,13 +94,13 @@ public class GestorUsuarios {
         initDao();
         try {
             if (usuarioDAO.existeLogin(propietario.getLogin())) {
-                model.addAttribute("error", "El usuario ya existe");
+                model.addAttribute(ERROR, "El usuario ya existe");
                 return REGISTRO_PROPIETARIO;
             }
             usuarioDAO.saveEntity(propietario);
             return REDIRECT_LOGIN;
         } catch (Exception e) {
-            model.addAttribute("error", "Error en registro: " + e.getMessage());
+            model.addAttribute(ERROR, "Error en registro: " + e.getMessage());
             return REGISTRO_PROPIETARIO;
         }
     }

@@ -31,7 +31,7 @@ class ListaDeseosIdTest {
         assertEquals(id1, id1, "Reflexividad: El objeto debe ser igual a sí mismo");
         
         
-        assertNotEquals(id1, null, "El objeto no debe ser igual a null");
+        assertNotEquals(null, id1, "El objeto no debe ser igual a null");
         
         
         assertNotEquals(id1, new Object(), "El objeto no debe ser igual a una instancia de otra clase");
